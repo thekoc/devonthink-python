@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "pydt3"
+version = "0.0.1"
+authors = [
+  { name="astrosheep", email="astrosheepthesheep@outlook.com" },
+]
+description = "This Python API for Devonthink 3 utilizes AppleScript (JXA) and PyObjC."
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = ["pyobjc-core", "pyobjc-framework-AppleScriptKit", "pyobjc-framework-AppleScriptObjC"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+]
+
+[project.urls]
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+include = ["pydt3*"] 
+
+[tool.setuptools.package-data]
+pydt3 = ["*.scpt"]
