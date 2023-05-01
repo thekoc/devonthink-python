@@ -78,4 +78,4 @@ You can check the documentation either in source code (`docstring`), code editor
 
 - The APIs are not fully tested. Please report any issues.
 - Rich texts in AppleScript are converted to strings in Python, which causes style information loss.
-- Collections of elements (eg. `database.records`) are converted to lists in Python. While in Applescript they are lazily retrieved. This may cause performance issues with large collection.
+- Collections of elements (eg. `database.records`) are converted to lists in Python. While in Applescript they are retrieved in a lazy manner. This may cause performance issues with large collections.
