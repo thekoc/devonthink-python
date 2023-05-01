@@ -9,7 +9,7 @@ version = "0.0.1"
 authors = [
   { name="astrosheep", email="astrosheepthesheep@outlook.com" },
 ]
-description = "This Python API for Devonthink 3 utilizes AppleScript (JXA) and PyObjC."
+description = "Python API for Devonthink 3 utilizes AppleScript (JXA) and PyObjC."
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = ["pyobjc-core", "pyobjc-framework-AppleScriptKit", "pyobjc-framework-AppleScriptObjC"]
