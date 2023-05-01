@@ -1,6 +1,5 @@
 *.pyc
 ~*.py
-*.png
 __pycache__/
 dist/
 *.egg-info/
