@@ -4,6 +4,6 @@ __pycache__/
 *.spec
 dist/
 build/
+*.dtBase2/
 *.egg-info/
-examples/
 docs/

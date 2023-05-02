@@ -1,0 +1,5 @@
+pydt3==0.0.1
+pyobjc-core==9.1.1
+pyobjc-framework-AppleScriptKit==9.1.1
+pyobjc-framework-AppleScriptObjC==9.1.1
+openai==0.27.6
