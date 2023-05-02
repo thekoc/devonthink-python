@@ -1,6 +1,6 @@
 # PyDT3 - The Python API For DEVONthink 3
 
-This Python API for Devonthink 3 utilizes AppleScript (JXA) and PyObjC.
+The Python API for Devonthink 3 utilizes AppleScript (JXA) and PyObjC.
 
 Most of the APIs are directly mapped to AppleScript (JXA).
 For example, these two are equivalent:
