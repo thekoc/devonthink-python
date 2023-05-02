@@ -39,7 +39,7 @@ dtp3 = DEVONthink3()
 inbox = dtp3.ext.inbox
 
 # create a new folder in inbox
-dtp3.create_location('hello-from-pydt3', inbox)
+dtp3.create_location('new-group-from-pydt3', inbox)
 
 # get selected records
 records = dtp3.selected_records
@@ -62,7 +62,7 @@ record = dtp3.create_record_with({
 
 ## Documentation
 
-Unlike many other API wrapper projects, PyDT3 is well documented thanks to the detailed AppleScript dictionary by DEVONthink team and code generation ability of ChatGTP.
+Unlike many other API wrapper projects, PyDT3 is well documented thanks to the detailed AppleScript dictionary by DEVONthink team and the code generation ability of ChatGTP.
 
 You can check the documentation either in source code (`docstring`), code editor (if properly configured), or the documentation site (not available at the time).
 
