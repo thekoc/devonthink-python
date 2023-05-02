@@ -70,11 +70,20 @@ function wrapObjToJson(obj) {
                 data: obj.toISOString()
             }
         }
-        // If it's array or dict
-        if (Array.isArray(obj) || obj.constructor.name === 'Object') {
-            let data = {};
+        if (Array.isArray(obj)) {
+            let data = []
             for (let i in obj) {
                 data[i] = wrapObjToJson(obj[i]);
+            }
+            return {
+                type: 'container',
+                data: data
+            }
+        }
+        if (obj.constructor.name === 'Object') {
+            let data = {}
+            for (let k in obj) {
+                data[k] = wrapObjToJson(obj[k]);
             }
             return {
                 type: 'container',
