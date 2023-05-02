@@ -470,6 +470,10 @@ class Record(OSAObjProxy):
     def plain_text(self) -> str:
         """The plain text of a record."""
         return self.get_property_native('plainText')
+    
+    @plain_text.setter
+    def plain_text(self, value: str):
+        self.set_property('plainText', value)
 
     @property
     def proposed_filename(self) -> str:
