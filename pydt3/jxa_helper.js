@@ -38,7 +38,7 @@ function isJsonNodeValue(obj) {
     return obj === null || ['undefined', 'string', 'number', 'boolean'].includes(typeof obj);
 }
 
-function isPlainJson(obj) {
+function isPlainObj(obj) {
     if (isJsonNodeValue(obj)) {
         return true;
     } else if (typeof obj === 'object') {
@@ -53,53 +53,53 @@ function isPlainJson(obj) {
     }
 }
 
-function wrapObjSpecToJson(objSpec) {
-    let evaluated = objSpec();
 
-    let classOf = ObjectSpecifier.classOf(objSpec);
-    if (classOf === 'application') {
-        return {
-            name: objSpec.name(),
-            type: 'reference',
-            rawId: getObjectId(objSpec),
-            objId: cacheObjct(objSpec),
-            className: classOf
-        }
-    }
-    if (isPlainJson(evaluated)) {
-        if (objSpec instanceof Date) {
-            return {
-                type: 'value',
-                data: objSpec.toISOString()
-            }
-        }
+function wrapObjToJson(obj) {
+
+    if (isJsonNodeValue(obj)) {
         return {
             type: 'value',
-            data: evaluated
+            data: obj
         }
     }
 
-    if (typeof evaluated === 'object') {
-        for (let k in evaluated) {
-            evaluated[k] = wrapObjSpecToJson(objSpec[k]);
+    if (typeof obj === 'object') {
+        if (obj instanceof Date) {
+            return {
+                type: 'value',
+                data: obj.toISOString()
+            }
         }
-        return {
-            type: 'container',
-            data: evaluated,
-        };
-    } 
-    
-    if (classOf !== undefined) {
-        // throw new Error(`Unknown type: ${typeof objSpc}`);
+        // If it's array or dict
+        if (Array.isArray(obj) || obj.constructor.name === 'Object') {
+            let data = {};
+            for (let i in obj) {
+                data[i] = wrapObjToJson(obj[i]);
+            }
+            return {
+                type: 'container',
+                data: data
+            }
+        }
+
+        throw new Error(`wrapObjToJson: Unknown type: ${typeof obj}`);
+    }
+
+    if (ObjectSpecifier.hasInstance(obj)) {
+        let classOf = ObjectSpecifier.classOf(obj);
+        let evaluated = obj();
+        if (evaluated !== undefined && !ObjectSpecifier.hasInstance(evaluated)) {
+            return wrapObjToJson(evaluated);
+        }
+
         return {
             type: 'reference',
-            objId: cacheObjct(objSpec),
+            objId: cacheObjct(obj),
             className: classOf
         }
-    } 
+    }
     
-    
-    throw new Error(`Unknown type: ${typeof objSpec}`);
+    throw new Error(`Unknown type: ${typeof obj}`);
 }
 
 function unwrapObjFromJson(obj) {
@@ -118,7 +118,8 @@ function unwrapObjFromJson(obj) {
 function getApplication(params) {
     let name = params.name;
     let app = Application(name);
-    return wrapObjSpecToJson(app);
+    app.includeStandardAdditions = true
+    return wrapObjToJson(app);
 }
 getApplication = jsonIOWrapper(getApplication);
 
@@ -129,7 +130,7 @@ function getProperties(params) {
     let data = {};
     for (let n of names) {
         let property = obj[n];
-        data[n] = wrapObjSpecToJson(property);
+        data[n] = wrapObjToJson(property);
     }
     return data;
 }
@@ -164,7 +165,7 @@ function runMethod(params) {
 
     let obj = objectCacheMap[objId];
     let result = obj[name](...args, kwargs);
-    return wrapObjSpecToJson(result);
+    return wrapObjToJson(result);
 }
 runMethod = jsonIOWrapper(runMethod);
 
@@ -189,6 +190,6 @@ function callSelf(params) {
     }
     let obj = objectCacheMap[objId];
     let result = obj(...args, kwargs);
-    return wrapObjSpecToJson(result);
+    return wrapObjToJson(result);
 }
 callSelf = jsonIOWrapper(callSelf);

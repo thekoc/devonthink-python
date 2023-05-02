@@ -52,62 +52,62 @@ class DEVONthink3(OSAObjProxy):
     @property
     def bates_number(self) -> int:
         """Current bates number."""
-        return self.window.get_property('bates number')
+        return self.get_property_native('batesNumber')
 
     @property
     def cancelled_progress(self) -> bool:
         """Specifies if a process with visible progress indicator should be cancelled."""
-        return self.window.get_property('cancelled progress')
+        return self.get_property_native('cancelledProgress')
 
     @property
     def content_record(self) -> Record:
         """The record of the visible document in the frontmost think window."""
-        return self.window.get_property('content record')
+        return self.get_property_native('contentRecord')
 
     @property
     def current_database(self) -> Database:
         """The currently used database."""
-        return self.window.get_property('current database')
+        return self.get_property_native('currentDatabase')
 
     @property
     def current_group(self) -> Record:
         """The (selected) group of the frontmost window of the current database. Returns root of current database if no current group exists."""
-        return self.window.get_property('current group')
+        return self.get_property_native('currentGroup')
 
     @property
     def current_workspace(self) -> str:
         """The name of the currently used workspace."""
-        return self.window.get_property('current workspace')
+        return self.get_property_native('currentWorkspace')
 
     @property
     def inbox(self) -> Database:
         """The global inbox."""
-        return self.window.get_property('inbox')
+        return self.get_property_native('inbox')
 
     @property
     def incoming_group(self) -> Record:
         """The default group for new notes. Either global inbox or incoming group of current database if global inbox isn't available."""
-        return self.window.get_property('incoming group')
+        return self.get_property_native('incomingGroup')
 
     @property
     def last_downloaded_URL(self) -> str:
         """The actual URL of the last download."""
-        return self.window.get_property('last downloaded URL')
+        return self.get_property_native('lastDownloadedURL')
 
     @property
     def last_downloaded_response(self) -> Record:
         """HTTP-Status, Last-Modified, Content-Type, Content-Length and Charset of last HTTP(S) response."""
-        return self.window.get_property('last downloaded response')
+        return self.get_property_native('lastDownloadedResponse')
 
     @property
     def preferred_import_destination(self) -> Record:
         """The default destination for data from external sources. See Preferences > Import > Destination."""
-        return self.window.get_property('preferred import destination')
+        return self.get_property_native('preferredImportDestination')
 
     @property
     def reading_list(self) -> List[dict]:
         """The items of the reading list."""
-        return self.window.get_property('reading list')
+        return self.get_property_native('readingList')
 
     @property
     def selection(self) -> list:
@@ -126,9 +126,33 @@ class DEVONthink3(OSAObjProxy):
     @property
     def workspaces(self) -> List[str]:
         """The names of all available workspaces."""
-        return self.window.get_property('workspaces')
+        return self.get_property_native('workspaces')
     
     # methods
+    ## standard additions
+    def display_dialog(self, text: str, place_holder: str = None, buttons: List[str]=None, default_button: str = None, with_icon: str = None) -> str:
+        """Display a dialog.
+
+        Args:
+            text (str): The text to display.
+            place_holder (str): The placeholder text.
+            with_icon (str): The icon to display.
+            buttons (List[str]): The buttons to display.
+            default_button (str): The default button.
+
+        Returns:
+            str: The selected button.
+        """
+        kwargs = {
+            'defaultAnswer': place_holder,
+            'buttons': buttons,
+            'defaultButton': default_button,
+            'withIcon': with_icon,
+        }
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return self.run_method('displayDialog', [text], kwargs)
+    
     def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> List[Record]:
         """Search for records in specified group or all databases.
 
