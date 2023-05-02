@@ -36,7 +36,7 @@ pip install pydt3
 from pydt3 import DEVONthink3
 dtp3 = DEVONthink3()
 
-inbox = dtp3.ext.inbox
+inbox = dtp3.inbox
 
 # create a new folder in inbox
 dtp3.create_location('new-group-from-pydt3', inbox)

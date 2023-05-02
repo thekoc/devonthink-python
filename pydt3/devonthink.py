@@ -347,7 +347,3 @@ class DevonthinkExtension:
         for db in dbs:
             if db.name == name:
                 return db
-    
-    @property
-    def inbox(self) -> Optional[Database]:
-        return self.db_by_name('Inbox')
