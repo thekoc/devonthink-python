@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import List, Optional
 from ..osascript import OSAScript, OSAObjProxy
 
 from typing import TYPE_CHECKING
@@ -16,32 +16,32 @@ class Record(OSAObjProxy):
     @property
     def children(self) -> List['Record']:
         """List of child records."""
-        return self.get_element_children('children')
+        return self.get_property_native('children')
 
     @property
     def incoming_references(self) -> List['Record']:
         """List of records referencing this record."""
-        return self.get_element_children('incomingReferences')
+        return self.get_property_native('incomingReferences')
 
     @property
     def incoming_wiki_references(self) -> List['Record']:
         """List of wiki records referencing this record."""
-        return self.get_element_children('incomingWikiReferences')
+        return [proxy.as_class(Record) for proxy in self.get_property_native('incomingWikiReferences')]
 
     @property
     def outgoing_references(self) -> List['Record']:
         """List of records this record references."""
-        return self.get_element_children('outgoingReferences')
+        return [proxy.as_class(Record) for proxy in self.get_property_native('outgoingReferences')]
 
     @property
     def outgoing_wiki_references(self) -> List['Record']:
         """List of wiki records this record references."""
-        return self.get_element_children('outgoingWikiReferences')
+        return [proxy.as_class(Record) for proxy in self.get_property_native('outgoingWikiReferences')]
 
     @property
     def parents(self) -> List['Record']:
         """List of parent records."""
-        return self.get_element_children('parents')
+        return self.get_property_native('parents')
 
     @property
     def texts(self):
@@ -64,7 +64,7 @@ class Record(OSAObjProxy):
         self.set_property('aliases', value)
 
     @property
-    def all_document_dates(self) -> List[str]:
+    def all_document_dates(self) -> Optional[List[str]]:
         """All dates extracted from text of document, e.g. a scan."""
         return self.get_property_native('allDocumentDates')
 
@@ -78,7 +78,7 @@ class Record(OSAObjProxy):
         self.set_property('altitude', value)
 
     @property
-    def annotation(self) -> 'Record':
+    def annotation(self) -> Optional['Record']:
         """Annotation of a record. Only plain & rich text and Markdown documents are supported."""
         return self.get_property_native('annotation')
 
@@ -115,7 +115,7 @@ class Record(OSAObjProxy):
         self.set_property('batesNumber', value)
         
     @property
-    def cells(self) -> list:
+    def cells(self) -> Optional[List[List[str]]]:
         """The cells of a sheet. This is a list of rows, each row contains a list of string values for the various colums."""
         return self.get_property_native('cells')
 
@@ -125,7 +125,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('characterCount')
 
     @property
-    def color(self) -> List[float]:
+    def color(self) -> Optional[List[float]]:
         """The color of a record. Currently only supported by tags."""
         return self.get_property_native('color')
 
@@ -135,7 +135,7 @@ class Record(OSAObjProxy):
         raise NotImplementedError()
 
     @property
-    def columns(self) -> List[str]:
+    def columns(self) -> Optional[List[str]]:
         """The column names of a sheet.""" 
         return self.get_property_native('columns')
 
@@ -149,7 +149,7 @@ class Record(OSAObjProxy):
         self.set_property('comment', value)
 
     @property
-    def content_hash(self) -> str:
+    def content_hash(self) -> Optional[str]:
         """Stored SHA1 hash of files and document packages."""
         return self.get_property_native('contentHash')
 
@@ -159,7 +159,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('creationDate')
 
     @property
-    def custom_meta_data(self) -> 'Record':
+    def custom_meta_data(self) -> Optional[dict]:
         """User-defined metadata of a record as a dictionary containing key-value pairs. Setting a value for an unknown key automatically adds a definition to Preferences > Data."""
         return self.get_property_native('customMetaData')
 
@@ -179,7 +179,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('date')
 
     @property
-    def digital_object_identifier(self) -> str:
+    def digital_object_identifier(self) -> Optional[str]:
         """Digital object identifier (DOI) extracted from text of document, e.g. a scanned receipt."""
         return self.get_property_native('digitalObjectIdentifier')
 
@@ -189,12 +189,12 @@ class Record(OSAObjProxy):
         return self.get_property_native('dimensions')
 
     @property
-    def document_amount(self) -> str:
+    def document_amount(self) -> Optional[str]:
         """Amount extracted from text of document, e.g. a scanned receipt."""
         return self.get_property_native('documentAmount')
 
     @property
-    def document_date(self) -> str:
+    def document_date(self) -> Optional[str]:
         """First date extracted from text of document, e.g. a scan."""
         return self.get_property_native('documentDate')
 
@@ -211,7 +211,9 @@ class Record(OSAObjProxy):
     @property
     def duplicates(self) -> List['Record']:
         """The duplicates of a record (only other instances, not including the record)."""
-        return self.get_property_object_list('duplicates')
+        # WARN: In applescript the class is not rightly defined, so this is a workaround
+        result = self.get_property_native('duplicates')
+        return [i.as_class(Record) for i in result]
 
     @property
     def duration(self) -> float:
@@ -279,7 +281,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('filename')
 
     @property
-    def geolocation(self) -> str:
+    def geolocation(self) -> Optional[str]:
         """The human readable geogr. place of a record."""
         return self.get_property_native('geolocation')
 
@@ -318,7 +320,7 @@ class Record(OSAObjProxy):
         self.set_property('interval', value)
 
     @property
-    def kind(self) -> str:
+    def kind(self) -> Optional[str]:
         """The human readable and localized kind of a record. WARNING: Don't use this to check the type of a record, otherwise your script might fail depending on the version and the localization."""
         return self.get_property_native('kind')
 
@@ -369,14 +371,14 @@ class Record(OSAObjProxy):
         self.set_property('longitude', value)
 
     @property
-    def meta_data(self) -> dict:
+    def meta_data(self) -> Optional[dict]:
         """Document metadata (e.g. of PDF or RTF) of a record as a dictionary containing key-value pairs. 
         Possible keys are currently kMDItemTitle, kMDItemHeadline, kMDItemSubject, kMDItemDescription, 
         kMDItemCopyright, kMDItemComment, kMDItemURL, kMDItemKeywords, kM"""
         return self.get_property_native('metaData')
 
     @property
-    def mime_type(self) -> str:
+    def mime_type(self) -> Optional[str]:
         """The (proposed) MIME type of a record."""
         return self.get_property_native('mimeType')
 
@@ -409,7 +411,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('nameWithoutExtension')
 
     @property
-    def newest_document_date(self) -> date:
+    def newest_document_date(self) -> Optional[str]:
         """Newest date extracted from text of document, e.g. a scan."""
         return self.get_property_native('newestDocumentDate')
 
@@ -433,12 +435,12 @@ class Record(OSAObjProxy):
         return self.get_property_native('numberOfReplicants')
 
     @property
-    def oldest_document_date(self) -> date:
+    def oldest_document_date(self) -> Optional[str]:
         """Oldest date extracted from text of document, e.g. a scan."""
         return self.get_property_native('oldestDocumentDate')
 
     @property
-    def opening_date(self) -> date:
+    def opening_date(self) -> Optional[str]:
         """Date when a content was opened the last time or when a feed was refreshed the last time."""
         return self.get_property_native('openingDate')
 
@@ -448,7 +450,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('pageCount')
 
     @property
-    def paginated_pdf(self) -> any:
+    def paginated_pdf(self):
         """A printed/converted PDF of the record."""
         return self.get_property_native('paginatedPDF')
 
@@ -498,7 +500,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('referenceURL')
 
     @property
-    def reminder(self) -> 'Reminder':
+    def reminder(self) -> Optional['Reminder']:
         """Reminder of a record."""
         return self.get_property_native('reminder')
 
@@ -507,7 +509,7 @@ class Record(OSAObjProxy):
         self.set_property('reminder', value)
 
     @property
-    def rich_text(self) -> str:
+    def rich_text(self) -> Optional[str]:
         """The rich text of a record (see text suite). 
         Use the 'text' relationship introduced by version 3.0 instead,
         especially for changing the contents/styles of RTF(D) documents."""
@@ -557,7 +559,7 @@ class Record(OSAObjProxy):
         self.set_property('tags', value)
 
     @property
-    def thumbnail(self) -> str:
+    def thumbnail(self) -> Optional[str]:
         """The thumbnail of a record. Setting supports both raw data and strings containing paths or URLs."""
         return self.get_property_native('thumbnail')
 
@@ -593,7 +595,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('uuid')
 
     @property
-    def web_archive(self) -> any:
+    def web_archive(self):
         """The web archive of a record if available or the record converted to web archive if possible."""
         return self.get_property_native('webArchive')
 
@@ -606,6 +608,9 @@ class Record(OSAObjProxy):
     def word_count(self) -> int:
         """The word count of a record."""
         return self.get_property_native('wordCount')
+    
+    def __repr__(self):
+        return f'<Record: {self.name}>'
 
 OSAObjProxy._NAME_CLASS_MAP['record'] = Record
 OSAObjProxy._NAME_CLASS_MAP['content'] = Record

@@ -47,7 +47,7 @@ class _PyObjectSpecifier:
     
 class OSAObjProxy:
     _NAME_CLASS_MAP = {}
-    _cached_proxies = {} # {script: {obj_id: proxy}}
+    _osaobj_rc = {} # {id(script): {obj_id: count}}
 
     script = None
     obj_id = None
@@ -57,6 +57,10 @@ class OSAObjProxy:
         self.script = script
         self.obj_id = obj_id
         self.class_name = class_name
+        # reference count plus one
+        self._osaobj_rc.setdefault(id(script), {}).setdefault(obj_id, 0)
+        self._osaobj_rc[id(script)][obj_id] += 1
+
 
     def get_property_raw(self, name: str):
         response = self.script.get_properties(self.obj_id, [name])[name]
@@ -87,17 +91,11 @@ class OSAObjProxy:
         if response['type'] == 'value':
             return response.get('data')
         elif response['type'] == 'reference':
-            class_name = response['className']
+            class_name = response.get('className', None)
             obj_id = response['objId']
-            # Cache the proxy object to avoid creating multiple proxies for the same object
-            cached_proxy_ref = cls._cached_proxies.get(id(script), {}).get(obj_id, None)
-            if cached_proxy_ref is None:
-                reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
-                cached_proxy = reference_cls(script, obj_id, class_name)
-                cls._cached_proxies.setdefault(id(script), {})[obj_id] = weakref.ref(cached_proxy)
-            else:
-                cached_proxy = cached_proxy_ref()
-            return cached_proxy
+            reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
+            proxy = reference_cls(script, obj_id, class_name)
+            return proxy
         elif response['type'] == 'container':
             data = response['data']
             if isinstance(data, list):
@@ -135,8 +133,12 @@ class OSAObjProxy:
             raise TypeError(f'Unsupported type: {type(obj)}')
     
     def __del__(self):
-        logger.debug(f'Releasing object: {self.obj_id} {self.class_name} {self} {id(self)}')
-        self.script.call_json('releaseObject', {'objId': self.obj_id})
+        self._osaobj_rc[id(self.script)][self.obj_id] -= 1
+        if self._osaobj_rc[id(self.script)][self.obj_id] <= 0:
+            self.script.call_json('releaseObject', {'objId': self.obj_id})
+    
+    def as_class(self, cls: 'OSAObjProxy'):
+        return cls(self.script, self.obj_id, self.class_name)
 
 
 class DefaultOSAObjProxy(OSAObjProxy):
@@ -199,7 +201,6 @@ class OSAScript:
         params = {'objId': obj_id, 'properties': properties}
         self.call_json('setPropertyValues', params)
         logger.debug(f'set_properties_values params: {params}')
-
     
     def fourcharcode(self, chars: bytes):
         return int.from_bytes(chars, 'big')
