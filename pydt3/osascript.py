@@ -75,15 +75,15 @@ class OSAObjProxy:
     def call_method(self, name: str, args = None, kwargs: dict = None):
         if kwargs is not None:
             kwargs = {k: self.pyobj_to_json(v) for k, v in kwargs.items()}
-        if args is None:
+        else:
+            kwargs = {}
+        if args is not None:
             args = [self.pyobj_to_json(arg) for arg in args]
+        else:
+            args = []
 
         params = {'objId': self.obj_id, 'name': name, 'args': args, 'kwargs': kwargs}
-        logger.debug(f'run_method params: {params}')
         response = self.script.call_json('callMethod', params)
-
-        logger.debug(f'run_method response: {response}')
-
         return self.json_to_pyobj(self.script, response)
 
     @classmethod

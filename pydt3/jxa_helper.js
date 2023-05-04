@@ -190,10 +190,13 @@ function callMethod(params) {
     let args = params.args;
     let kwargs = params.kwargs;
 
+    let obj = getCachedObject(objId);
+    let func;
+
     if (name === null) {
-        func = getCachedObject(objId);
+        func = obj
     } else {
-        func = getCachedObject(objId)[name];
+        func = obj[name].bind(obj);
     }
 
     if (args === null) {
