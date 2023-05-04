@@ -5,8 +5,11 @@ import random
 import configparser
 import time
 from io import StringIO
-from pydt3 import DEVONthink3
+import sys
+sys.path.insert(0, '.')
 
+
+from pydt3 import DEVONthink3
 
 
 stop_words_en = "-- ? “ ” 》 －－ able about above according accordingly across actually after afterwards again against ain't all allow allows almost alone along already also although always am among amongst an and another any anybody anyhow anyone anything anyway anyways anywhere apart appear appreciate appropriate are aren't around as a's aside ask asking associated at available away awfully be became because become becomes becoming been before beforehand behind being believe below beside besides best better between beyond both brief but by came can cannot cant can't cause causes certain certainly changes clearly c'mon co com come comes concerning consequently consider considering contain containing contains corresponding could couldn't course c's currently definitely described despite did didn't different do does doesn't doing done don't down downwards during each edu eg eight either else elsewhere enough entirely especially et etc even ever every everybody everyone everything everywhere ex exactly example except far few fifth first five followed following follows for former formerly forth four from further furthermore get gets getting given gives go goes going gone got gotten greetings had hadn't happens hardly has hasn't have haven't having he hello help hence her here hereafter hereby herein here's hereupon hers herself he's hi him himself his hither hopefully how howbeit however i'd ie if ignored i'll i'm immediate in inasmuch inc indeed indicate indicated indicates inner insofar instead into inward is isn't it it'd it'll its it's itself i've just keep keeps kept know known knows last lately later latter latterly least less lest let let's like liked likely little look looking looks ltd mainly many may maybe me mean meanwhile merely might more moreover most mostly much must my myself name namely nd near nearly necessary need needs neither never nevertheless new next nine no nobody non none noone nor normally not nothing novel now nowhere obviously of off often oh ok okay old on once one ones only onto or other others otherwise ought our ours ourselves out outside over overall own particular particularly per perhaps placed please plus possible presumably probably provides que quite qv rather rd re really reasonably regarding regardless regards relatively respectively right said same saw say saying says second secondly see seeing seem seemed seeming seems seen self selves sensible sent serious seriously seven several shall she should shouldn't since six so some somebody somehow someone something sometime sometimes somewhat somewhere soon sorry specified specify specifying still sub such sup sure take taken tell tends th than thank thanks thanx that thats that's the their theirs them themselves then thence there thereafter thereby therefore therein theres there's thereupon these they they'd they'll they're they've think third this thorough thoroughly those though three through throughout thru thus to together too took toward towards tried tries truly try trying t's twice two un under unfortunately unless unlikely until unto up upon us use used useful uses using usually value various very via viz vs want wants was wasn't way we we'd welcome well we'll went were we're weren't we've what whatever what's when whence whenever where whereafter whereas whereby wherein where's whereupon wherever whether which while whither who whoever whole whom who's whose why will willing wish with within without wonder won't would wouldn't yes yet you you'd you'll your you're yours yourself yourselves you've zero zt ZT zz ZZ"\
@@ -24,7 +27,7 @@ TAG_GENERATION_PROMPT = "Generate < 10 tags from the summary, seperated by comma
 
 DEFAULT_CONFIG = {
     'GENERAL': {'api_key': ''},
-    'ADD_TAGS': {'prompt': TAG_GENERATION_PROMPT, 'request_interval': 25}
+    'ADD_TAGS': {'prompt': TAG_GENERATION_PROMPT, 'request_interval': 30}
 }
 
 
@@ -111,7 +114,7 @@ def generate_tags(content) -> list[str]:
     return [tag.strip() for tag in response.split(",")]
 
 def chat_once(messages: list) -> str:
-    error_prompt = 'If error occurs, starts with "!!!"'
+    error_prompt = 'If something is wrong, reply starts with "!!!"'
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -130,8 +133,9 @@ def generate_tags_v2(content) -> list[str]:
     summarize_prompt = """Summerize the following text:"""
     summary = chat_once([summarize_prompt, content])
     print("summary: ", summary)
+    time.sleep(5)
     tags = chat_once([config.get('ADD_TAGS', 'prompt'), summary])
-
+    print("tags: ", tags)
     return [tag.strip() for tag in tags.split(",")]
 
 
@@ -144,8 +148,11 @@ def add_tags_to_selected_records():
     total = len(records)
     dtp.show_progress_indicator("Generating tags...", cancel_button=True, steps=total)
 
+    first = True
     for record in records:
         try:
+            if not first:
+                time.sleep(config.getint('ADD_TAGS', 'request_interval'))
             dtp.step_progress_indicator("Generating tags for " + record.name)
             tags = generate_tags_v2('title: ' + record.name + '\ncontent: ' + record.plain_text)
             record.tags = tags
@@ -154,7 +161,7 @@ def add_tags_to_selected_records():
             error_message += f"\n{record.name}\n==========\n {e}\n"
             break
             
-        time.sleep(config.getint('ADD_TAGS', 'request_interval'))
+        
     
     if has_error:
         dtp.display_dialog(error_message)
