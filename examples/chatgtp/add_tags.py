@@ -1,13 +1,9 @@
-import os
 import openai
-import sys
-import json
-import re
-
-sys.path.insert(0, '.')
 from pydt3 import DEVONthink3
 
 dtp = DEVONthink3()
+
+
 def get_api_key():
     result = dtp.search("name==__openai_api_key__")
     if result:
