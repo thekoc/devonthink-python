@@ -85,7 +85,7 @@ class OSAObjProxy:
     @classmethod
     def json_to_pyobj(cls, script: 'OSAScript', response: dict):
         if response['type'] == 'value':
-            return response['data']
+            return response.get('data')
         elif response['type'] == 'reference':
             class_name = response['className']
             obj_id = response['objId']

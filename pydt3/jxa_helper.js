@@ -96,8 +96,17 @@ function wrapObjToJson(obj) {
 
     if (ObjectSpecifier.hasInstance(obj)) {
         let classOf = ObjectSpecifier.classOf(obj);
+
+        if (classOf === 'application') {
+            return {
+                type: 'reference',
+                objId: cacheObjct(obj),
+                className: 'application'
+            }
+        }
+
         let evaluated = obj();
-        if (evaluated !== undefined && !ObjectSpecifier.hasInstance(evaluated)) {
+        if (!ObjectSpecifier.hasInstance(evaluated)) {
             return wrapObjToJson(evaluated);
         }
 

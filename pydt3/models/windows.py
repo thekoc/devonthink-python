@@ -151,7 +151,7 @@ class DocumentWindow(ThinkWindow):
         """The record of the visible document."""
         return self.get_property_native('record')
 
-OSAObjProxy._NAME_CLASS_MAP['documentWindow'] = ThinkWindow
+OSAObjProxy._NAME_CLASS_MAP['documentWindow'] = DocumentWindow
 
 
 class ViewerWindow(ThinkWindow):
@@ -191,4 +191,4 @@ class ViewerWindow(ThinkWindow):
     def selection(self) -> list:
         """The current selection."""
         raise NotImplementedError()
-OSAObjProxy._NAME_CLASS_MAP['viewerWindow'] = ThinkWindow
+OSAObjProxy._NAME_CLASS_MAP['viewerWindow'] = ViewerWindow

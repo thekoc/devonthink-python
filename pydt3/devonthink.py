@@ -77,7 +77,7 @@ class DEVONthink3(DefaultOSAObjProxy):
         return self.get_property_native('currentGroup')
 
     @property
-    def current_workspace(self) -> str:
+    def current_workspace(self) -> Optional[str]:
         """The name of the currently used workspace."""
         return self.get_property_native('currentWorkspace')
 
@@ -97,7 +97,7 @@ class DEVONthink3(DefaultOSAObjProxy):
         return self.get_property_native('lastDownloadedURL')
 
     @property
-    def last_downloaded_response(self) -> Record:
+    def last_downloaded_response(self) -> Optional[Record]:
         """HTTP-Status, Last-Modified, Content-Type, Content-Length and Charset of last HTTP(S) response."""
         return self.get_property_native('lastDownloadedResponse')
 
