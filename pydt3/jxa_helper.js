@@ -107,7 +107,15 @@ function wrapObjToJson(obj) {
             className: classOf
         }
     }
-    
+
+    if (typeof obj === 'function') {
+        return {
+            type: 'reference',
+            objId: cacheObjct(obj),
+            className: 'function'
+        }
+    }
+
     throw new Error(`Unknown type: ${typeof obj}`);
 }
 
@@ -160,23 +168,30 @@ function setPropertyValues(params) {
 }
 setPropertyValues = jsonIOWrapper(setPropertyValues);
 
-function runMethod(params) {
+function callMethod(params) {
     let objId = params.objId;
     let name = params.name;
     let args = params.args;
+
+    if (name === null) {
+        func = getCachedObject(objId);
+    } else {
+        func = getCachedObject(objId)[name];
+    }
+
     for (let i = 0; i < args.length; i++) {
         args[i] = unwrapObjFromJson(args[i]);
     }
+
     let kwargs = {};
     for (let k in params.kwargs) {
         kwargs[k] = unwrapObjFromJson(params.kwargs[k]);
     }
 
-    let obj = objectCacheMap[objId];
-    let result = obj[name](...args, kwargs);
+    let result = func(...args, kwargs);
     return wrapObjToJson(result);
 }
-runMethod = jsonIOWrapper(runMethod);
+callMethod = jsonIOWrapper(callMethod);
 
 
 function releaseObject(params) {
