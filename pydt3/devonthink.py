@@ -339,6 +339,9 @@ class DEVONthink3(DefaultOSAObjProxy):
             Record: The record with the specified uuid or item link.
         """
         return self.call_method('getRecordWithUuid', [text], {'in': database})
+    
+    def __repr__(self):
+        return f'<DEVONthink3 {self.app.name}>'
 
 class DevonthinkExtension:
     def __init__(self, app: DEVONthink3):

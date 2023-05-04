@@ -112,6 +112,9 @@ class Database(OSAObjProxy):
     def uuid(self) -> str:
         """The unique and persistent identifier of a database for external referencing."""
         return self.get_property_native('uuid')
+    
+    def __repr__(self):
+        return f'<Database {self.name}>'
 
 
 OSAObjProxy._NAME_CLASS_MAP['database'] = Database

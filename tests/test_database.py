@@ -12,17 +12,21 @@ class TestDatabase(unittest.TestCase):
         super().__init__(methodName)
         dbs = DEVONthink3().databases
         assert len(dbs) > 0, "No databases found"
-        self.db = dbs[0]
+        self.dbs = dbs
     
     def test_properties(self):
-        obj = self.db
+        for db in self.dbs:
+            self._test_db(db)
+    
+    def _test_db(self, db):
+        obj = db
         type_ = type(obj)
         for name in dir(type_):
             try:
                 if name.startswith('_'):
                     continue
                 if isinstance(getattr(type_, name), property):
-                    logger.info(f"Testing {type_}.{name}")
+                    logger.info(f"Testing {obj}.{name}")
                     returned_value = getattr(obj, name)
                     returned_type = typing.get_type_hints(getattr(type_, name).fget)['return']
                     generic_origin = typing.get_origin(returned_type)
