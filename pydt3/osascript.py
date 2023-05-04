@@ -48,6 +48,11 @@ class _PyObjectSpecifier:
 class OSAObjProxy:
     _NAME_CLASS_MAP = {}
     _cached_proxies = {} # {script: {obj_id: proxy}}
+
+    script = None
+    obj_id = None
+    class_name = None
+    
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
         self.script = script
         self.obj_id = obj_id
@@ -63,16 +68,15 @@ class OSAObjProxy:
     def get_property_native(self, name: str):
         return self.json_to_pyobj(self.script, self.get_property_raw(name))
     
-    def run_method(self, name: str, args, kwargs: dict = None):
-        if kwargs is None:
-            kwargs = {}
-
-        kwargs = {k: self.pyobj_to_json(v) for k, v in kwargs.items()}
-        args = [self.pyobj_to_json(arg) for arg in args]
+    def call_method(self, name: str, args = None, kwargs: dict = None):
+        if kwargs is not None:
+            kwargs = {k: self.pyobj_to_json(v) for k, v in kwargs.items()}
+        if args is None:
+            args = [self.pyobj_to_json(arg) for arg in args]
 
         params = {'objId': self.obj_id, 'name': name, 'args': args, 'kwargs': kwargs}
         logger.debug(f'run_method params: {params}')
-        response = self.script.call_json('runMethod', params)
+        response = self.script.call_json('callMethod', params)
 
         logger.debug(f'run_method response: {response}')
 
@@ -141,6 +145,15 @@ class DefaultOSAObjProxy(OSAObjProxy):
     
     def __getattr__(self, name):
         return self.get_property_native(name)
+
+    def __setattr__(self, name, value):
+        try:
+            super().__setattr__(name, value)
+        except AttributeError:
+            self.set_property(name, value)
+    
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.call_method(name=None, args=args, kwargs=kwargs)
 
 class OSAScript:
     def __init__(self, script: NSAppleScript):

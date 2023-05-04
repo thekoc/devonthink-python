@@ -1,5 +1,5 @@
 import os
-from .osascript import OSAScript, OSAObjProxy
+from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy
 from .models.record import Record
 from .models.database import Database
 from .models.windows import (ThinkWindow, DocumentWindow, ViewerWindow)
@@ -7,7 +7,9 @@ from typing import Optional, Union, List
 
 script_path = os.path.join(os.path.dirname(__file__), 'jxa_helper.scpt')
 
-class DEVONthink3(OSAObjProxy):
+class DEVONthink3(DefaultOSAObjProxy):
+    name = None # To override the default __getattr__ behavior
+
     def __init__(self, name="DEVONthink 3") -> None:
         self.name = name
         self.script = OSAScript.from_path(script_path)
@@ -151,7 +153,7 @@ class DEVONthink3(OSAObjProxy):
         }
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
-        return self.run_method('displayDialog', [text], kwargs)
+        return self.call_method('displayDialog', [text], kwargs)
     
     def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> List[Record]:
         """Search for records in specified group or all databases.
@@ -164,7 +166,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             List[Record]: The list of records matching the search string.
         """
-        return self.run_method('search', [text], {
+        return self.call_method('search', [text], {
             'comparision': comparision,
             'excludeSubgroups': excludeSubgroups,
         })
@@ -182,7 +184,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The imported record.
         """
-        return self.run_method('import', [file_path], {
+        return self.call_method('import', [file_path], {
             'from': source_app,
             'name': record_name,
             'placeholders': placeholders,
@@ -200,7 +202,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The record of the indicated file or folder.
         """
-        return self.run_method('indicate', text, {
+        return self.call_method('indicate', text, {
             'to': to_,
             'fileType': file_type,
         })
@@ -218,7 +220,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Database: The opened database.
         """
-        return self.run_method('open database', [file_path])
+        return self.call_method('open database', [file_path])
     
     def create_database(self, text: str) -> Database:
         """Create a new database.
@@ -229,7 +231,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Database: The new database object.
         """
-        return self.run_method('createDatabase', [text])
+        return self.call_method('createDatabase', [text])
 
     def create_location(self, text: str, database: Database = None) -> Record:
         """Create a hierarchy of groups if necessary.
@@ -241,7 +243,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The created record.
         """
-        return self.run_method('createLocation', [text], {
+        return self.call_method('createLocation', [text], {
             'database': database,
         })
 
@@ -254,7 +256,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The newly created record.
         """
-        return self.run_method('createRecordWith', [properties], {'in': in_})
+        return self.call_method('createRecordWith', [properties], {'in': in_})
 
     def delete(self, record: 'Record', in_: Optional['Record'] = None) -> bool:
         """Delete all instances of a record from the database or one instance from the specified group.
@@ -266,7 +268,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             bool: `True` if the deletion was successful.
         """
-        return self.run_method('delete', [], {'record': record, 'in': in_})
+        return self.call_method('delete', [], {'record': record, 'in': in_})
 
     def get_database_with_uuid(self, text: str) -> Database:
         """Get database with the specified uuid.
@@ -277,7 +279,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Database: The database with the specified uuid.
         """
-        return self.run_method('getDatabaseWithUuid', [text])
+        return self.call_method('getDatabaseWithUuid', [text])
 
 
 
@@ -292,7 +294,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Union[Record, List[Record]]: The moved record or list of records.
         """
-        return self.run_method('move', [], {
+        return self.call_method('move', [], {
             'record': record,
             'to': to,
             'from': from_,
@@ -309,7 +311,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The replicated record.
         """
-        return self.run_method('replicate', [], {
+        return self.call_method('replicate', [], {
             'record': record,
             'to': to,
         })
@@ -324,7 +326,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The record at the specified location.
         """
-        return self.run_method('getRecordAt', [text], {'in': database})
+        return self.call_method('getRecordAt', [text], {'in': database})
 
     def get_record_with_uuid(self, text: str, database: Optional[Database] = None) -> Record:
         """Get record with the specified uuid or item link.
@@ -336,7 +338,7 @@ class DEVONthink3(OSAObjProxy):
         Returns:
             Record: The record with the specified uuid or item link.
         """
-        return self.run_method('getRecordWithUuid', [text], {'in': database})
+        return self.call_method('getRecordWithUuid', [text], {'in': database})
 
 class DevonthinkExtension:
     def __init__(self, app: DEVONthink3):

@@ -140,6 +140,10 @@ function getApplication(params) {
 }
 getApplication = jsonIOWrapper(getApplication);
 
+function isMethod(obj) {
+    return typeof obj === 'function' && obj.constructor.name === 'Function';
+}
+
 function getProperties(params) {
     let objId = params.objId;
     let names = params.names;
@@ -147,6 +151,9 @@ function getProperties(params) {
     let data = {};
     for (let n of names) {
         let property = obj[n];
+        if (isMethod(property)) {
+            property = property.bind(obj);
+        }
         data[n] = wrapObjToJson(property);
     }
     return data;
@@ -172,6 +179,7 @@ function callMethod(params) {
     let objId = params.objId;
     let name = params.name;
     let args = params.args;
+    let kwargs = params.kwargs;
 
     if (name === null) {
         func = getCachedObject(objId);
@@ -179,13 +187,17 @@ function callMethod(params) {
         func = getCachedObject(objId)[name];
     }
 
+    if (args === null) {
+        args = [];
+    }
+
     for (let i = 0; i < args.length; i++) {
         args[i] = unwrapObjFromJson(args[i]);
     }
-
-    let kwargs = {};
-    for (let k in params.kwargs) {
-        kwargs[k] = unwrapObjFromJson(params.kwargs[k]);
+    if (kwargs !== null) {
+        for (let k in params.kwargs) {
+            kwargs[k] = unwrapObjFromJson(params.kwargs[k]);
+        }
     }
 
     let result = func(...args, kwargs);
