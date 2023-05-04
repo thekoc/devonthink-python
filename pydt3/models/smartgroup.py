@@ -1,8 +1,10 @@
 from .record import Record
+from ..osascript import OSAObjProxy, OSAScript
 
 class SmartGroup(Record):
-    def __init__(self, item_ref):
-        super().__init__(item_ref)
+    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
+        super().__init__(script, obj_id, class_name)
+
     # properties
     @property
     def exclude_subgroups(self) -> bool:
@@ -39,3 +41,5 @@ class SmartGroup(Record):
     @search_predicates.setter
     def search_predicates(self, value: str):
         self.set_property('searchPredicates', value)
+
+OSAObjProxy._NAME_CLASS_MAP['smartGroup'] = SmartGroup
