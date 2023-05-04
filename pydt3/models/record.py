@@ -615,4 +615,5 @@ class Record(OSAObjProxy):
 OSAObjProxy._NAME_CLASS_MAP['record'] = Record
 OSAObjProxy._NAME_CLASS_MAP['content'] = Record
 OSAObjProxy._NAME_CLASS_MAP['parent'] = Record
+OSAObjProxy._NAME_CLASS_MAP['child'] = Record
 OSAObjProxy._NAME_CLASS_MAP['selectedRecord'] = Record

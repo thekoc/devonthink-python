@@ -155,6 +155,38 @@ class DEVONthink3(DefaultOSAObjProxy):
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         return self.call_method('displayDialog', [text], kwargs)
     
+    
+    def display_notification(self, text: str, with_title: str = None, subtitle: str = None, sound_name: str = None) -> None:
+        return self.call_method('displayNotification', [text], {
+            'withTitle': with_title,
+            'subtitle': subtitle,
+            'soundName': sound_name,
+        })
+    
+    
+    # DEVONthink suit
+
+    def show_progress_indicator(self, title: str, cancel_button: bool, steps: int) -> bool:
+        """Show a progress indicator or update an already visible indicator. You have to ensure that the indicator is hidden again via 'hide progress indicator' when the script ends or if an error occurs.
+        
+        Args:
+            title (str): The title of the progress.
+            cancel_button (bool):  Display a button to cancel the process.
+            steps (int):  The number of steps of the progress or a negative value for an indeterminate number.
+        """
+        return self.call_method('showProgressIndicator', [title], {
+            'cancelButton': cancel_button,
+            'steps': steps,
+        })
+    
+    def hide_progress_indicator(self) -> bool:
+        """Hide a visible progress indicator."""
+        return self.call_method('hideProgressIndicator')
+        
+    def step_progress_indicator(self, title) -> bool:
+        """Go to next step of a progress."""
+        return self.call_method('stepProgressIndicator', [title])
+
     def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> List[Record]:
         """Search for records in specified group or all databases.
 
@@ -251,7 +283,7 @@ class DEVONthink3(DefaultOSAObjProxy):
         """Create a new record.
 
         Args:
-            record (Record): The properties of the record. Possible keys for record are 'name', 'type', 'comment', 'path', 'URL', 'creation date', 'modification date', 'date', 'plain text', 'rich text', 'source', 'data', 'content', 'columns', 'cells', 'thumbnail' and 'tags'.
+            record (dict): The properties of the record. Possible keys for record are 'name', 'type', 'comment', 'path', 'URL', 'creation date', 'modification date', 'date', 'plain text', 'rich text', 'source', 'data', 'content', 'columns', 'cells', 'thumbnail' and 'tags'.
             in_ (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
         Returns:
             Record: The newly created record.
