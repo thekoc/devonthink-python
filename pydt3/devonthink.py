@@ -254,7 +254,7 @@ class DEVONthink3(DefaultOSAObjProxy):
         """
         return self.call_method('open database', [file_path])
     
-    def create_database(self, text: str) -> Database:
+    def create_database(self, path: str) -> Database:
         """Create a new database.
 
         Args:
@@ -263,20 +263,20 @@ class DEVONthink3(DefaultOSAObjProxy):
         Returns:
             Database: The new database object.
         """
-        return self.call_method('createDatabase', [text])
+        return self.call_method('createDatabase', [path])
 
-    def create_location(self, text: str, database: Database = None) -> Record:
+    def create_location(self, path: str, database: Database = None) -> Record:
         """Create a hierarchy of groups if necessary.
 
         Args:
-            text (str): The hierarchy as a POSIX path (/ in names has to be replaced with \/, see location property).
+            path (str): The hierarchy as a POSIX path (/ in names has to be replaced with \/, see location property).
             database (Database, optional): The database. Uses current database if not specified.
 
         Returns:
             Record: The created record.
         """
-        return self.call_method('createLocation', [text], {
-            'database': database,
+        return self.call_method('createLocation', [path], {
+            'in': database,
         })
 
     def create_record_with(self, properties: dict, in_: Optional['Record'] = None) -> Record:
