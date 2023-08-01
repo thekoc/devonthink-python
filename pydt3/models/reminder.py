@@ -77,3 +77,5 @@ class Reminder(OSAObjProxy):
     @week_of_month.setter
     def week_of_month(self, value: str):
         self.set_property('weekOfMonth', value)
+
+OSAObjProxy._NAME_CLASS_MAP['reminder'] = Reminder

@@ -1,21 +1,21 @@
 import os
+from functools import lru_cache
+from .application import Application
 from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy
 from .models.record import Record
 from .models.database import Database
 from .models.windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 from typing import Optional, Union, List
 
-script_path = os.path.join(os.path.dirname(__file__), 'jxa_helper.scpt')
 
-class DEVONthink3(DefaultOSAObjProxy):
+
+class DEVONthink3(Application):
     name = None # To override the default __getattr__ behavior
 
     def __init__(self, name="DEVONthink 3") -> None:
+        super().__init__(name)
         self.name = name
-        self.script = OSAScript.from_path(script_path)
         self._ext = DevonthinkExtension(self)
-        response = self.script.call_json('getApplication', {'name': self.name})
-        super().__init__(self.script, response['objId'], response['className'])
 
     @property
     def ext(self) -> 'DevonthinkExtension':
@@ -28,7 +28,12 @@ class DEVONthink3(DefaultOSAObjProxy):
             DevonthinkExtension
         """
         return self._ext
-
+    
+    @property
+    def id(self) -> str:
+        """The unique identifier of the application."""
+        return self.get_property_native('id')
+    
     # elements
     @property
     def databases(self) -> List[Database]:

@@ -43,8 +43,7 @@ class _PyObjectSpecifier:
 
     def __getattr__(self, name: str):
         pass 
-    
-    
+
 class OSAObjProxy:
     _NAME_CLASS_MAP = {}
     _osaobj_rc = {} # {id(script): {obj_id: count}}
