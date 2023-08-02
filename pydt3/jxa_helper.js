@@ -76,7 +76,7 @@ function wrapObjToJson(obj) {
                 data[i] = wrapObjToJson(obj[i]);
             }
             return {
-                type: 'container',
+                type: 'array',
                 data: data
             }
         }
@@ -86,7 +86,7 @@ function wrapObjToJson(obj) {
                 data[k] = wrapObjToJson(obj[k]);
             }
             return {
-                type: 'container',
+                type: 'dict',
                 data: data
             }
         }
@@ -135,7 +135,7 @@ function wrapObjToJson(obj) {
 function unwrapObjFromJson(obj) {
     if (obj.type === 'plain') {
         return obj.data;
-    } else if (obj.type === 'container') {
+    } else if (obj.type === 'array' || obj.type === 'dict') {
         for (let k in obj.data) {
             obj.data[k] = unwrapObjFromJson(obj.data[k]);
         }

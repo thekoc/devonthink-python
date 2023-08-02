@@ -30,16 +30,18 @@ class _PyObjectSpecifier:
         elif response['type'] == 'reference':
             obj_id = response['objId']
             return cls(script, obj_id)
-        elif response['type'] == 'container':
+        elif response['type'] == 'array':
             data = response['data']
-            if isinstance(data, list):
-                return [
-                    cls.json_to_pyobj(script, i) for i in data
-                ]
-            elif isinstance(data, dict):
-                return {
-                    k: cls.json_to_pyobj(script, v) for k, v in data.items()
-                }
+            assert isinstance(data, list)
+            return [
+                cls.json_to_pyobj(script, i) for i in data
+            ]
+        elif response['type'] == 'dict':
+            data = response['data']
+            assert isinstance(data, dict)
+            return {
+                k: cls.json_to_pyobj(script, v) for k, v in data.items()
+            }
 
     def __getattr__(self, name: str):
         pass 
@@ -95,16 +97,18 @@ class OSAObjProxy:
             reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
             proxy = reference_cls(script, obj_id, class_name)
             return proxy
-        elif response['type'] == 'container':
+        elif response['type'] == 'array':
             data = response['data']
-            if isinstance(data, list):
-                return [
-                    cls.json_to_pyobj(script, i) for i in data
-                ]
-            elif isinstance(data, dict):
-                return {
-                    k: cls.json_to_pyobj(script, v) for k, v in data.items()
-                }
+            assert isinstance(data, list)
+            return [
+                cls.json_to_pyobj(script, i) for i in data
+            ]
+        elif response['type'] == 'dict':
+            data = response['data']
+            assert isinstance(data, dict)
+            return {
+                k: cls.json_to_pyobj(script, v) for k, v in data.items()
+            }
     
     @classmethod
     def pyobj_to_json(cls, obj):
@@ -115,12 +119,12 @@ class OSAObjProxy:
             }
         elif isinstance(obj, (list, tuple)):
             return {
-                'type': 'container',
+                'type': 'array',
                 'data': [cls.pyobj_to_json(i) for i in obj]
             }
         elif isinstance(obj, dict):
             return {
-                'type': 'container',
+                'type': 'dict',
                 'data': {k: cls.pyobj_to_json(v) for k, v in obj.items()}
             }
         elif isinstance(obj, OSAObjProxy):
