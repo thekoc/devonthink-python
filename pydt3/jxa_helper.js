@@ -34,6 +34,43 @@ function jsonIOWrapper(func) {
     }
 }
 
+const getAssociatedApplication = (() => {
+    const appCache = {};
+    return function getAssociatedApplication(obj) {
+        let displayString = Automation.getDisplayString(window);
+        let m = displayString.match(/^Application\(['"]([^)]*)['"]\)/);
+        if (m) {
+            let name = m[1];
+            if (appCache[name] === undefined) {
+                appCache[name] = Application(name);
+            }
+            return appCache[name];
+        }
+        return null;
+    }
+})();
+
+function guessIsContainerSpecifier(specifier) {
+    if (!ObjectSpecifier.hasInstance(specifier)) {
+        return false;
+    }
+    let proto = Object.getPrototypeOf(specifier);
+    const testPropNames = ['whose', 'at'];
+    return testPropNames.every((propName) => propName in proto);
+}
+
+function guessClassOfSpecifier(specifier) {
+    // It's at best a guess due to the nature of JXA.
+    if (!ObjectSpecifier.hasInstance(specifier)) {
+        return undefined;
+    }
+    let specifierClass = ObjectSpecifier.classOf(specifier);
+    if (guessIsContainerSpecifier(specifier)) {
+        return 'array::' + specifierClass;
+    }
+    return specifierClass;
+}
+
 function isJsonNodeValue(obj) {
     return obj === null || ['undefined', 'string', 'number', 'boolean'].includes(typeof obj);
 }
@@ -64,6 +101,7 @@ function wrapObjToJson(obj) {
     }
 
     if (typeof obj === 'object') {
+        // TODO: Handle Date
         if (obj instanceof Date) {
             return {
                 type: 'plain',
@@ -95,13 +133,31 @@ function wrapObjToJson(obj) {
     }
 
     if (ObjectSpecifier.hasInstance(obj)) {
-        let classOf = ObjectSpecifier.classOf(obj);
+        let guessClass = guessClassOfSpecifier(obj);
+        if (guessClass === undefined) {
+            // The object is a specifier but we don't know its class.
+            // This could mean that the object is a reference to a primitive value.
+            // eg. a `number`, `bool` or `string`.
+            // In that case, the best we can do is to return the evaluated value.
+            let evaluated = obj();
+            return wrapObjToJson(evaluated);
+        }
 
-        if (classOf === 'application') {
+        if (guessClass === 'application') {
             return {
                 type: 'reference',
                 objId: cacheObjct(obj),
+                plainRepr: null,
                 className: 'application'
+            }
+        }
+
+        if (guessClass.startsWith('array::')) {
+            return {
+                type: 'reference',
+                objId: cacheObjct(obj),
+                plainRepr: null,
+                className: guessClass
             }
         }
 
@@ -110,14 +166,15 @@ function wrapObjToJson(obj) {
         //          In that case, the object "can" be interpreted as a plain object but still
         //          has properties that are references to other objects.
         let evaluated = obj();
-        if (!ObjectSpecifier.hasInstance(evaluated)) {
-            return wrapObjToJson(evaluated);
+        if (!isPlainObj(evaluated)) {
+            evaluated = null;
         }
 
         return {
             type: 'reference',
             objId: cacheObjct(obj),
-            className: classOf
+            className: guessClass,
+            plainRepr: evaluated
         }
     }
 

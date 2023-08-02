@@ -8,6 +8,20 @@ if TYPE_CHECKING:
     from .database import Database
     from .reminder import Reminder
 
+class CustomMetaData:
+    def __init__(self, owner: 'Record'):
+        self.owner = owner
+        self._dict = owner.get_property_native('customMetaData')
+        
+    def __getitem__(self, key: str) -> str:
+        return self._script.call(f'get custom meta data of {self._class_name} {self._obj_id} for {key}')
+
+    def __setitem__(self, key: str, value: str):
+        self._script.call(f'set custom meta data of {self._class_name} {self._obj_id} for {key} to {value}')
+
+    def __repr__(self):
+        return f'<CustomMetaData: {self._class_name} {self._obj_id}>'
+
 class Record(OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
         super().__init__(script, obj_id, class_name)
@@ -45,7 +59,7 @@ class Record(OSAObjProxy):
 
     @property
     def texts(self):
-        """List of texts of the record."""
+        """List of texts of the record. (Not implemented. It is broken in JXA.)"""
         raise NotImplementedError()  
 
     # properties

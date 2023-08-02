@@ -5,47 +5,6 @@ import weakref
 from Foundation import NSAppleScript, NSURL, NSAppleEventDescriptor
 logger = getLogger(__name__)
 
-class _PyObjectSpecifier:
-    def __init__(self, script: 'OSAScript', obj_id: int):
-        self.script = script
-        self.obj_id = obj_id
-    
-    def __call__(self, args=None, kwargs=None) -> Any:
-        if args is None:
-            args = []
-        if kwargs is None:
-            kwargs = {}
-        response  = self.script.call_json('callSelf', {
-            'objId': self.obj_id,
-            'args': [self.script.pyobj_to_json(arg) for arg in args],
-            'kwargs': {k: self.script.pyobj_to_json(v) for k, v in kwargs.items()}
-        })
-
-        return self.json_to_pyobj(self.script, response)
-    
-    @classmethod
-    def json_to_pyobj(cls, script: 'OSAScript', response: dict):
-        if response['type'] == 'plain':
-            return response['data']
-        elif response['type'] == 'reference':
-            obj_id = response['objId']
-            return cls(script, obj_id)
-        elif response['type'] == 'array':
-            data = response['data']
-            assert isinstance(data, list)
-            return [
-                cls.json_to_pyobj(script, i) for i in data
-            ]
-        elif response['type'] == 'dict':
-            data = response['data']
-            assert isinstance(data, dict)
-            return {
-                k: cls.json_to_pyobj(script, v) for k, v in data.items()
-            }
-
-    def __getattr__(self, name: str):
-        pass 
-
 class OSAObjProxy:
     _NAME_CLASS_MAP = {}
     _osaobj_rc = {} # {id(script): {obj_id: count}}
@@ -61,7 +20,6 @@ class OSAObjProxy:
         # reference count plus one
         self._osaobj_rc.setdefault(id(script), {}).setdefault(obj_id, 0)
         self._osaobj_rc[id(script)][obj_id] += 1
-
 
     def get_property_raw(self, name: str):
         response = self.script.get_properties(self.obj_id, [name])[name]
@@ -94,7 +52,10 @@ class OSAObjProxy:
         elif response['type'] == 'reference':
             class_name = response.get('className', None)
             obj_id = response['objId']
-            reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
+            if class_name is not None and class_name.startswith('array::'):
+                reference_cls = OSAObjArray
+            else:
+                reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
             proxy = reference_cls(script, obj_id, class_name)
             return proxy
         elif response['type'] == 'array':
@@ -139,10 +100,29 @@ class OSAObjProxy:
         self._osaobj_rc[id(self.script)][self.obj_id] -= 1
         if self._osaobj_rc[id(self.script)][self.obj_id] <= 0:
             self.script.call_json('releaseObject', {'objId': self.obj_id})
-    
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.call_method(name=None, args=args, kwargs=kwargs)
+
     def as_class(self, cls: 'OSAObjProxy'):
         return cls(self.script, self.obj_id, self.class_name)
 
+class OSAObjArray(OSAObjProxy):
+    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
+        super().__init__(script, obj_id, class_name)
+        self._cached_array = None
+
+    def whose(self, **kwargs):
+        raise NotImplementedError()
+    
+    def __len__(self):
+        return self.get_property_native('length')
+
+    def __getitem__(self, index: int):
+        return self.call_method('at', args=[index])
+    
+    def __iter__(self):
+        return iter(self())
 
 class DefaultOSAObjProxy(OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
@@ -157,9 +137,6 @@ class DefaultOSAObjProxy(OSAObjProxy):
         except AttributeError:
             self.set_property(name, value)
     
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self.call_method(name=None, args=args, kwargs=kwargs)
-
 class OSAScript:
     def __init__(self, script: NSAppleScript):
         self.script = script

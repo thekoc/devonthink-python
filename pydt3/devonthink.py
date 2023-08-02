@@ -4,6 +4,7 @@ from .application import Application
 from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy
 from .models.record import Record
 from .models.database import Database
+from .models.text import Text
 from .models.windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 from typing import Optional, Union, List
 
