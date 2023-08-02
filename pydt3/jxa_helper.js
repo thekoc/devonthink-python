@@ -58,7 +58,7 @@ function wrapObjToJson(obj) {
 
     if (isJsonNodeValue(obj)) {
         return {
-            type: 'value',
+            type: 'plain',
             data: obj
         }
     }
@@ -66,7 +66,7 @@ function wrapObjToJson(obj) {
     if (typeof obj === 'object') {
         if (obj instanceof Date) {
             return {
-                type: 'value',
+                type: 'plain',
                 data: obj.toISOString()
             }
         }
@@ -105,6 +105,10 @@ function wrapObjToJson(obj) {
             }
         }
 
+        // If the evaluated object is a plain object, return the evaluated value.
+        // WARNING: This may cause problems if the object is a reference to a text or dict.
+        //          In that case, the object "can" be interpreted as a plain object but still
+        //          has properties that are references to other objects.
         let evaluated = obj();
         if (!ObjectSpecifier.hasInstance(evaluated)) {
             return wrapObjToJson(evaluated);
@@ -129,7 +133,7 @@ function wrapObjToJson(obj) {
 }
 
 function unwrapObjFromJson(obj) {
-    if (obj.type === 'value') {
+    if (obj.type === 'plain') {
         return obj.data;
     } else if (obj.type === 'container') {
         for (let k in obj.data) {

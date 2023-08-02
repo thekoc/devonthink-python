@@ -25,7 +25,7 @@ class _PyObjectSpecifier:
     
     @classmethod
     def json_to_pyobj(cls, script: 'OSAScript', response: dict):
-        if response['type'] == 'value':
+        if response['type'] == 'plain':
             return response['data']
         elif response['type'] == 'reference':
             obj_id = response['objId']
@@ -87,7 +87,7 @@ class OSAObjProxy:
 
     @classmethod
     def json_to_pyobj(cls, script: 'OSAScript', response: dict):
-        if response['type'] == 'value':
+        if response['type'] == 'plain':
             return response.get('data')
         elif response['type'] == 'reference':
             class_name = response.get('className', None)
@@ -110,7 +110,7 @@ class OSAObjProxy:
     def pyobj_to_json(cls, obj):
         if isinstance(obj, (int, float, str, bool, type(None))):
             return {
-                'type': 'value',
+                'type': 'plain',
                 'data': obj
             }
         elif isinstance(obj, (list, tuple)):
