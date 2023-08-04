@@ -6,9 +6,12 @@ from typing import List, TYPE_CHECKING
 class Text(OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
         super().__init__(script, obj_id, class_name)
-    
+
     def __str__(self) -> str:
         return self()
+    
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} {self}>'
 
     # elements
     # @property
@@ -46,22 +49,22 @@ class Text(OSAObjProxy):
     # def color(self, value: Color):
     #     self.set_property('color', value)
 
-    # @property
-    # def font(self) -> Text:
-    #     """The name of the font of the first character."""
-    #     return self.get_property_native('font')
+    @property
+    def font(self) -> str:
+        """The name of the font of the first character."""
+        return self.get_property_native('font')
 
-    # @font.setter
-    # def font(self, value: Text):
-    #     self.set_property('font', value)
+    @font.setter
+    def font(self, value: str):
+        self.set_property('font', value)
 
-    # @property
-    # def size(self) -> int:
-    #     """The size in points of the first character."""
-    #     return self.get_property('size', int)
+    @property
+    def size(self) -> int:
+        """The size in points of the first character."""
+        return self.get_property_native('size')
 
-    # @size.setter
-    # def size(self, value: int):
-    #     self.set_property('size', value)
+    @size.setter
+    def size(self, value: int):
+        self.set_property('size', value)
 
 OSAObjProxy._NAME_CLASS_MAP['text'] = Text

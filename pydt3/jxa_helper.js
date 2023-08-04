@@ -64,7 +64,15 @@ function guessClassOfSpecifier(specifier) {
     if (!ObjectSpecifier.hasInstance(specifier)) {
         return undefined;
     }
-    let specifierClass = ObjectSpecifier.classOf(specifier);
+    let specifierClass = undefined;
+    try {
+        specifierClass = specifier.class();
+    } catch (e) {
+        if (e.errorNumber === -1700) {
+            // The object is not a specifier.
+            return undefined;
+        }
+    }
     if (guessIsContainerSpecifier(specifier)) {
         return 'array::' + specifierClass;
     }

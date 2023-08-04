@@ -1,5 +1,5 @@
 
-from typing import List, Optional
+from typing import List, Optional, Any
 from ..osascript import OSAScript, OSAObjProxy
 
 from typing import TYPE_CHECKING
@@ -7,20 +7,34 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .database import Database
     from .reminder import Reminder
+    from .text import Text
 
 class CustomMetaData:
-    def __init__(self, owner: 'Record'):
+    def __init__(self, owner: 'Record', property_name: str):
         self.owner = owner
-        self._dict = owner.get_property_native('customMetaData')
+        self.dict_proxy = owner.get_property_native(property_name)
+        self.property_name = property_name
+
+    def get_dict_value(self):
+        value = self.dict_proxy();
+        if value is None:
+            value = {}
+        return value
+
+    def __iter__(self):
+        return iter(self.get_dict_value())
         
-    def __getitem__(self, key: str) -> str:
-        return self._script.call(f'get custom meta data of {self._class_name} {self._obj_id} for {key}')
+    def __getitem__(self, key: str) -> Any:
+        return self.get_dict_value()[key]
 
-    def __setitem__(self, key: str, value: str):
-        self._script.call(f'set custom meta data of {self._class_name} {self._obj_id} for {key} to {value}')
+    def __setitem__(self, key: str, value: Any):
+        prev_dict = self.get_dict_value()
+        print(f"*****{prev_dict}")
+        prev_dict[key] = value
+        self.owner.set_property(self.property_name, prev_dict)
 
-    def __repr__(self):
-        return f'<CustomMetaData: {self._class_name} {self._obj_id}>'
+    def __repr__(self) -> str:
+        return f'<{type(self).__name__}: {self.get_dict_value()}>'
 
 class Record(OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
@@ -175,7 +189,7 @@ class Record(OSAObjProxy):
     @property
     def custom_meta_data(self) -> Optional[dict]:
         """User-defined metadata of a record as a dictionary containing key-value pairs. Setting a value for an unknown key automatically adds a definition to Preferences > Data."""
-        return self.get_property_native('customMetaData')
+        return RecordDict(self, 'customMetaData')
 
     @property
     def data(self) -> str:
@@ -523,7 +537,7 @@ class Record(OSAObjProxy):
         self.set_property('reminder', value)
 
     @property
-    def rich_text(self) -> Optional[str]:
+    def rich_text(self) -> Optional['Text']:
         """The rich text of a record (see text suite). 
         Use the 'text' relationship introduced by version 3.0 instead,
         especially for changing the contents/styles of RTF(D) documents."""

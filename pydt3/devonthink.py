@@ -11,11 +11,8 @@ from typing import Optional, Union, List
 
 
 class DEVONthink3(Application):
-    name = None # To override the default __getattr__ behavior
-
     def __init__(self, name="DEVONthink 3") -> None:
         super().__init__(name)
-        self.name = name
         self._ext = DevonthinkExtension(self)
 
     @property
@@ -379,7 +376,7 @@ class DEVONthink3(Application):
         return self.call_method('getRecordWithUuid', [text], {'in': database})
     
     def __repr__(self):
-        return f'<DEVONthink3 {self.app.name}>'
+        return f'<DEVONthink3 {self.id}>'
 
 class DevonthinkExtension:
     def __init__(self, app: DEVONthink3):

@@ -1,8 +1,9 @@
 import json
 from logging import getLogger
 from typing import Any
-import weakref
 from Foundation import NSAppleScript, NSURL, NSAppleEventDescriptor
+from . import application
+
 logger = getLogger(__name__)
 
 class OSAObjProxy:
@@ -17,9 +18,14 @@ class OSAObjProxy:
         self.script = script
         self.obj_id = obj_id
         self.class_name = class_name
+        self._associsated_application = None
         # reference count plus one
         self._osaobj_rc.setdefault(id(script), {}).setdefault(obj_id, 0)
-        self._osaobj_rc[id(script)][obj_id] += 1
+        self._osaobj_rc[id(script)][obj_id] += 1 
+    
+    @property
+    def associsated_application(self):
+        return self._associsated_application
 
     def get_property_raw(self, name: str):
         response = self.script.get_properties(self.obj_id, [name])[name]
@@ -29,7 +35,10 @@ class OSAObjProxy:
         self.script.set_properties_values(self.obj_id, {name: value})
 
     def get_property_native(self, name: str):
-        return self.json_to_pyobj(self.script, self.get_property_raw(name))
+        pyobj = self.json_to_pyobj(self.script, self.get_property_raw(name))
+        if isinstance(pyobj, OSAObjProxy):
+            pyobj._associsated_application = self.associsated_application
+        return pyobj
     
     def call_method(self, name: str, args = None, kwargs: dict = None):
         if kwargs is not None:
@@ -43,7 +52,10 @@ class OSAObjProxy:
 
         params = {'objId': self.obj_id, 'name': name, 'args': args, 'kwargs': kwargs}
         response = self.script.call_json('callMethod', params)
-        return self.json_to_pyobj(self.script, response)
+        pyobj = self.json_to_pyobj(self.script, response)
+        if isinstance(pyobj, OSAObjProxy):
+            pyobj._associsated_application = self.associsated_application
+        return pyobj
 
     @classmethod
     def json_to_pyobj(cls, script: 'OSAScript', response: dict):
@@ -57,6 +69,7 @@ class OSAObjProxy:
             else:
                 reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
             proxy = reference_cls(script, obj_id, class_name)
+            assert isinstance(proxy, OSAObjProxy)
             return proxy
         elif response['type'] == 'array':
             data = response['data']
