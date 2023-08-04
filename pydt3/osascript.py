@@ -1,8 +1,11 @@
 import json
 from logging import getLogger
-from typing import Any
+from typing import Any, Optional, TypeVar, Sequence, Generic, TYPE_CHECKING
 from Foundation import NSAppleScript, NSURL, NSAppleEventDescriptor
-from . import application
+
+
+if TYPE_CHECKING:
+    from .application import Application
 
 logger = getLogger(__name__)
 
@@ -24,7 +27,7 @@ class OSAObjProxy:
         self._osaobj_rc[id(script)][obj_id] += 1 
     
     @property
-    def associsated_application(self):
+    def associsated_application(self) -> Optional['Application']:
         return self._associsated_application
 
     def get_property_raw(self, name: str):
@@ -35,9 +38,7 @@ class OSAObjProxy:
         self.script.set_properties_values(self.obj_id, {name: value})
 
     def get_property_native(self, name: str):
-        pyobj = self.json_to_pyobj(self.script, self.get_property_raw(name))
-        if isinstance(pyobj, OSAObjProxy):
-            pyobj._associsated_application = self.associsated_application
+        pyobj = self.json_to_pyobj(self.script, self.get_property_raw(name), self.associsated_application)
         return pyobj
     
     def call_method(self, name: str, args = None, kwargs: dict = None):
@@ -52,13 +53,13 @@ class OSAObjProxy:
 
         params = {'objId': self.obj_id, 'name': name, 'args': args, 'kwargs': kwargs}
         response = self.script.call_json('callMethod', params)
-        pyobj = self.json_to_pyobj(self.script, response)
+        pyobj = self.json_to_pyobj(self.script, response, self.associsated_application)
         if isinstance(pyobj, OSAObjProxy):
             pyobj._associsated_application = self.associsated_application
         return pyobj
 
     @classmethod
-    def json_to_pyobj(cls, script: 'OSAScript', response: dict):
+    def json_to_pyobj(cls, script: 'OSAScript', response: dict, associated_application: Optional['Application'] = None):
         if response['type'] == 'plain':
             return response.get('data')
         elif response['type'] == 'reference':
@@ -66,22 +67,39 @@ class OSAObjProxy:
             obj_id = response['objId']
             if class_name is not None and class_name.startswith('array::'):
                 reference_cls = OSAObjArray
-            else:
-                reference_cls = cls._NAME_CLASS_MAP.get(class_name, DefaultOSAObjProxy)
+            elif class_name is not None:
+                current_class_name = class_name
+                reference_cls = None
+                while current_class_name is not None:
+                    reference_cls = cls._NAME_CLASS_MAP.get(current_class_name)
+                    if reference_cls is not None:
+                        break
+                    if associated_application is not None:
+                        current_class_name = associated_application.parent_of_class(current_class_name)
+                    else:
+                        break
+
+            if reference_cls is None:
+                reference_cls = DefaultOSAObjProxy
+            
             proxy = reference_cls(script, obj_id, class_name)
+
+            if associated_application is not None and isinstance(proxy, OSAObjProxy):
+                proxy._associsated_application = associated_application
+            
             assert isinstance(proxy, OSAObjProxy)
             return proxy
         elif response['type'] == 'array':
             data = response['data']
             assert isinstance(data, list)
             return [
-                cls.json_to_pyobj(script, i) for i in data
+                cls.json_to_pyobj(script, i, associated_application) for i in data
             ]
         elif response['type'] == 'dict':
             data = response['data']
             assert isinstance(data, dict)
             return {
-                k: cls.json_to_pyobj(script, v) for k, v in data.items()
+                k: cls.json_to_pyobj(script, v, associated_application) for k, v in data.items()
             }
     
     @classmethod
@@ -120,20 +138,22 @@ class OSAObjProxy:
     def as_class(self, cls: 'OSAObjProxy'):
         return cls(self.script, self.obj_id, self.class_name)
 
-class OSAObjArray(OSAObjProxy):
+
+T = TypeVar('T')
+class OSAObjArray(Sequence[T], OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
         super().__init__(script, obj_id, class_name)
         self._cached_array = None
 
-    def whose(self, **kwargs):
+    def whose(self, **kwargs) -> 'OSAObjArray[T]':
         raise NotImplementedError()
     
-    def __len__(self):
+    def __len__(self) -> int:
         return self.get_property_native('length')
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> T:
         return self.call_method('at', args=[index])
-    
+
     def __iter__(self):
         return iter(self())
 

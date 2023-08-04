@@ -1,5 +1,5 @@
 
-from ..osascript import OSAScript, OSAObjProxy
+from ..osascript import OSAScript, OSAObjProxy, OSAObjArray
 from typing import List
 from .record import Record
 from .smartgroup import SmartGroup
@@ -10,7 +10,7 @@ class Database(OSAObjProxy):
         
     # elements
     @property
-    def contents(self) -> List['Record']:
+    def contents(self) -> OSAObjArray['Record']:
         """The contents of the database."""
         return self.get_property_native('contents')
 

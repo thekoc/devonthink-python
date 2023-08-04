@@ -1,5 +1,5 @@
 
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Sequence
 from ..osascript import OSAScript, OSAObjProxy
 
 from typing import TYPE_CHECKING
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from .reminder import Reminder
     from .text import Text
 
-class CustomMetaData:
+class CustomMetaData(Sequence):
     def __init__(self, owner: 'Record', property_name: str):
         self.owner = owner
         self.dict_proxy = owner.get_property_native(property_name)
@@ -641,7 +641,3 @@ class Record(OSAObjProxy):
         return f'<Record: {self.name}>'
 
 OSAObjProxy._NAME_CLASS_MAP['record'] = Record
-OSAObjProxy._NAME_CLASS_MAP['content'] = Record
-OSAObjProxy._NAME_CLASS_MAP['parent'] = Record
-OSAObjProxy._NAME_CLASS_MAP['child'] = Record
-OSAObjProxy._NAME_CLASS_MAP['selectedRecord'] = Record

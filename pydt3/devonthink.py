@@ -1,7 +1,7 @@
 import os
 from functools import lru_cache
 from .application import Application
-from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy
+from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy, OSAObjArray
 from .models.record import Record
 from .models.database import Database
 from .models.text import Text
@@ -27,22 +27,17 @@ class DEVONthink3(Application):
         """
         return self._ext
     
-    @property
-    def id(self) -> str:
-        """The unique identifier of the application."""
-        return self.get_property_native('id')
-    
     # elements
     @property
-    def databases(self) -> List[Database]:
+    def databases(self) -> OSAObjArray[Database]:
         return self.get_property_native('databases')
     
     @property
-    def dcoument_windows(self) -> List[DocumentWindow]:
+    def dcoument_windows(self) -> OSAObjArray[DocumentWindow]:
         return self.get_property_native('documentWindows')
 
     @property
-    def selected_records(self) -> List[Record]:
+    def selected_records(self) -> OSAObjArray[Record]:
         return self.get_property_native('selectedRecords')
     
     @property

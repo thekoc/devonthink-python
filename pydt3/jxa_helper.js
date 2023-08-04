@@ -100,7 +100,9 @@ function isPlainObj(obj) {
 
 
 function wrapObjToJson(obj) {
-
+    if (obj === undefined) {
+        obj = null;
+    }
     if (isJsonNodeValue(obj)) {
         return {
             type: 'plain',

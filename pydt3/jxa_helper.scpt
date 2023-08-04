@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_ƒconst getObjectId = (() => {
+JsOsaDAS1.001.00bplist00ÑVscript_¹const getObjectId = (() => {
     let count = 0;
     const objIdMap = new WeakMap();
     return (object) => {
@@ -100,7 +100,9 @@ function isPlainObj(obj) {
 
 
 function wrapObjToJson(obj) {
-
+    if (obj === undefined) {
+        obj = null;
+    }
     if (isJsonNodeValue(obj)) {
         return {
             type: 'plain',
@@ -309,4 +311,4 @@ function callSelf(params) {
     let result = obj(...args, kwargs);
     return wrapObjToJson(result);
 }
-callSelf = jsonIOWrapper(callSelf);                              ™ jscr  úÞÞ­
+callSelf = jsonIOWrapper(callSelf);                              Ï jscr  úÞÞ­
