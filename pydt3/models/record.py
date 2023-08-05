@@ -1,6 +1,6 @@
 
 from typing import List, Optional, Any, Sequence
-from ..osascript import OSAScript, OSAObjProxy
+from ..osascript import OSAScript, OSAObjProxy, OSAObjArray
 
 from typing import TYPE_CHECKING
 
@@ -42,32 +42,32 @@ class Record(OSAObjProxy):
 
     # elements
     @property
-    def children(self) -> List['Record']:
+    def children(self) -> OSAObjArray['Record']:
         """List of child records."""
         return self.get_property_native('children')
 
     @property
-    def incoming_references(self) -> List['Record']:
+    def incoming_references(self) -> OSAObjArray['Record']:
         """List of records referencing this record."""
         return self.get_property_native('incomingReferences')
 
     @property
-    def incoming_wiki_references(self) -> List['Record']:
+    def incoming_wiki_references(self) -> OSAObjArray['Record']:
         """List of wiki records referencing this record."""
         return [proxy.as_class(Record) for proxy in self.get_property_native('incomingWikiReferences')]
 
     @property
-    def outgoing_references(self) -> List['Record']:
+    def outgoing_references(self) -> OSAObjArray['Record']:
         """List of records this record references."""
         return [proxy.as_class(Record) for proxy in self.get_property_native('outgoingReferences')]
 
     @property
-    def outgoing_wiki_references(self) -> List['Record']:
+    def outgoing_wiki_references(self) -> OSAObjArray['Record']:
         """List of wiki records this record references."""
         return [proxy.as_class(Record) for proxy in self.get_property_native('outgoingWikiReferences')]
 
     @property
-    def parents(self) -> List['Record']:
+    def parents(self) -> OSAObjArray['Record']:
         """List of parent records."""
         return self.get_property_native('parents')
 
@@ -92,7 +92,7 @@ class Record(OSAObjProxy):
         self.set_property('aliases', value)
 
     @property
-    def all_document_dates(self) -> Optional[List[str]]:
+    def all_document_dates(self) -> Optional[OSAObjArray[str]]:
         """All dates extracted from text of document, e.g. a scan."""
         return self.get_property_native('allDocumentDates')
 
@@ -143,7 +143,7 @@ class Record(OSAObjProxy):
         self.set_property('batesNumber', value)
         
     @property
-    def cells(self) -> Optional[List[List[str]]]:
+    def cells(self) -> Optional[OSAObjArray[OSAObjArray[str]]]:
         """The cells of a sheet. This is a list of rows, each row contains a list of string values for the various colums."""
         return self.get_property_native('cells')
 
@@ -153,17 +153,17 @@ class Record(OSAObjProxy):
         return self.get_property_native('characterCount')
 
     @property
-    def color(self) -> Optional[List[float]]:
+    def color(self) -> Optional[OSAObjArray[float]]:
         """The color of a record. Currently only supported by tags."""
         return self.get_property_native('color')
 
     @color.setter
-    def color(self, value: List[float]):
+    def color(self, value: OSAObjArray[float]):
         "There seems to be a bug when setting the color "
         raise NotImplementedError()
 
     @property
-    def columns(self) -> Optional[List[str]]:
+    def columns(self) -> Optional[OSAObjArray[str]]:
         """The column names of a sheet.""" 
         return self.get_property_native('columns')
 
@@ -212,7 +212,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('digitalObjectIdentifier')
 
     @property
-    def dimensions(self) -> List[int]:
+    def dimensions(self) -> OSAObjArray[int]:
         """The width and height of an image or PDF document in pixels."""
         return self.get_property_native('dimensions')
 
@@ -237,7 +237,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('dpi')
 
     @property
-    def duplicates(self) -> List['Record']:
+    def duplicates(self) -> OSAObjArray['Record']:
         """The duplicates of a record (only other instances, not including the record)."""
         # WARN: In applescript the class is not rightly defined, so this is a workaround
         result = self.get_property_native('duplicates')
@@ -578,7 +578,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('tagType')
 
     @property
-    def tags(self) -> List[str]:
+    def tags(self) -> OSAObjArray[str]:
         """The tags of a record."""
         return self.get_property_native('tags')
 

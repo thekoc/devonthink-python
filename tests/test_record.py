@@ -2,8 +2,7 @@ import unittest
 import typing
 import logging
 from pydt3 import DEVONthink3
-
-from . import utils
+from pydt3.models.record import Record
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -14,17 +13,49 @@ class TestRecord(unittest.TestCase):
         super().__init__(methodName)
         dbs = DEVONthink3().databases
         assert len(dbs) > 0, "No databases found"
+        print("AAAA")
+        print(dbs[0].name)
         self.dbs = dbs
+        self.records = [record for db in dbs for record in db.contents]
     
-    def test_properties(self):
-        for db in self.dbs:
-            for record in db.contents:
-                if record.reference_url != 'x-devonthink-item://884BBB5B-5629-4C5D-825A-C3844F9B8754':
-                    continue
-                utils._test_obj_properties(record, skips=('data', 'web_archive', 'source', 'paginated_pdf', 'image', 'thumbnail', 'plain_text', 'rich_text'))
-            
+    
+    def test_children(self):
+        for record in self.records:
+            children = record.children
+            self.assertTrue(isinstance(children, typing.Sequence))
+            self.assertTrue(all(isinstance(child, Record) for child in children))
 
+    def test_incoming_references(self):
+        for record in self.records:
+            incoming_references = record.incoming_references
+            self.assertTrue(isinstance(incoming_references, typing.Sequence))
+            self.assertTrue(all(isinstance(incoming_reference, Record) for incoming_reference in incoming_references))
 
+    def test_outgoing_references(self):
+        for record in self.records:
+            outgoing_references = record.outgoing_references
+            self.assertTrue(isinstance(outgoing_references, typing.Sequence))
+            self.assertTrue(all(isinstance(outgoing_reference, Record) for outgoing_reference in outgoing_references))
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_parents(self):
+        for record in self.records:
+            parents = record.parents
+            self.assertTrue(isinstance(parents, typing.Sequence))
+            self.assertTrue(all(isinstance(parent, Record) for parent in parents))
+
+    def test_addition_date(self):
+        for record in self.records:
+            addition_date = record.addition_date
+            self.assertTrue(isinstance(addition_date, str))
+
+    def test_aliases(self):
+        for record in self.records:
+            aliases = record.aliases
+            self.assertTrue(isinstance(aliases, str))
+
+    def test_all_document_dates(self):
+        for record in self.records:
+            all_document_dates = record.all_document_dates
+            if all_document_dates is not None:
+                self.assertTrue(isinstance(all_document_dates, typing.Sequence))
+                self.assertTrue(all(isinstance(date, str) for date in all_document_dates))
