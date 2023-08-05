@@ -65,6 +65,10 @@ function guessClassOfSpecifier(specifier) {
         return undefined;
     }
     let specifierClass = undefined;
+    if (guessIsContainerSpecifier(specifier)) {
+        specifierClass = ObjectSpecifier.classOf(specifier);
+        return 'array::' + specifierClass;
+    }
     try {
         specifierClass = specifier.class();
     } catch (e) {
@@ -73,9 +77,7 @@ function guessClassOfSpecifier(specifier) {
             return undefined;
         }
     }
-    if (guessIsContainerSpecifier(specifier)) {
-        return 'array::' + specifierClass;
-    }
+
     return specifierClass;
 }
 

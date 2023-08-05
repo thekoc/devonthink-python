@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_¹const getObjectId = (() => {
+JsOsaDAS1.001.00bplist00ÑVscript_÷const getObjectId = (() => {
     let count = 0;
     const objIdMap = new WeakMap();
     return (object) => {
@@ -65,6 +65,10 @@ function guessClassOfSpecifier(specifier) {
         return undefined;
     }
     let specifierClass = undefined;
+    if (guessIsContainerSpecifier(specifier)) {
+        specifierClass = ObjectSpecifier.classOf(specifier);
+        return 'array::' + specifierClass;
+    }
     try {
         specifierClass = specifier.class();
     } catch (e) {
@@ -73,9 +77,7 @@ function guessClassOfSpecifier(specifier) {
             return undefined;
         }
     }
-    if (guessIsContainerSpecifier(specifier)) {
-        return 'array::' + specifierClass;
-    }
+
     return specifierClass;
 }
 
@@ -311,4 +313,4 @@ function callSelf(params) {
     let result = obj(...args, kwargs);
     return wrapObjToJson(result);
 }
-callSelf = jsonIOWrapper(callSelf);                              Ï jscr  úÞÞ­
+callSelf = jsonIOWrapper(callSelf);                                jscr  úÞÞ­

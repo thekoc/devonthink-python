@@ -3,6 +3,7 @@ import typing
 import logging
 from pydt3 import DEVONthink3
 from pydt3.models.record import Record
+from pydt3.models.text import Text
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -18,6 +19,16 @@ class TestRecord(unittest.TestCase):
         self.dbs = dbs
         self.records = [record for db in dbs for record in db.contents]
     
+    def test_general(self):
+        record: Record
+        for record in self.records:
+            # record: Record
+            self.assertTrue(isinstance(record, Record))
+            self.assertTrue(isinstance(record.uuid, str))
+            self.assertTrue(isinstance(record.name, str))
+            self.assertTrue(isinstance(record.path, str))
+            self.assertTrue(isinstance(record.plain_text, str))
+            self.assertTrue(isinstance(record.rich_text, (Text, type(None))))
     
     def test_children(self):
         for record in self.records:
@@ -59,3 +70,4 @@ class TestRecord(unittest.TestCase):
             if all_document_dates is not None:
                 self.assertTrue(isinstance(all_document_dates, typing.Sequence))
                 self.assertTrue(all(isinstance(date, str) for date in all_document_dates))
+    
