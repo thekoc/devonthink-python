@@ -1,22 +1,26 @@
 
-from typing import List, Optional, Any, Sequence
+from typing import List, Optional, Any, TYPE_CHECKING
+
+from ..devonthink import DEVONthink3
 from ..osascript import OSAScript, OSAObjProxy, OSAObjArray
 
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .database import Database
     from .reminder import Reminder
     from .text import Text
 
-class CustomMetaData(Sequence):
+
+
+class CustomMetaData:
+
     def __init__(self, owner: 'Record', property_name: str):
         self.owner = owner
-        self.dict_proxy = owner.get_property_native(property_name)
+        self.meta_dict = owner.get_property_native(property_name)
         self.property_name = property_name
 
     def get_dict_value(self):
-        value = self.dict_proxy();
+        value = self.meta_dict;
         if value is None:
             value = {}
         return value
@@ -25,13 +29,19 @@ class CustomMetaData(Sequence):
         return iter(self.get_dict_value())
         
     def __getitem__(self, key: str) -> Any:
-        return self.get_dict_value()[key]
+        if isinstance(self.owner.binded_application, DEVONthink3):
+            return self.owner.binded_application.get_custom_meta_data(key, self.owner)
+        else:
+            return self.get_dict_value().get(key)
 
     def __setitem__(self, key: str, value: Any):
-        prev_dict = self.get_dict_value()
-        print(f"*****{prev_dict}")
-        prev_dict[key] = value
-        self.owner.set_property(self.property_name, prev_dict)
+        if isinstance(self.owner.binded_application, DEVONthink3):
+            return self.owner.binded_application.add_custom_meta_data(value, key, self.owner)
+        else:
+            return self.get_dict_value().get(key)
+            prev_dict = self.get_dict_value()
+            prev_dict[key] = value
+            self.owner.set_property(self.property_name, prev_dict)
 
     def __repr__(self) -> str:
         return f'<{type(self).__name__}: {self.get_dict_value()}>'
@@ -189,7 +199,7 @@ class Record(OSAObjProxy):
     @property
     def custom_meta_data(self) -> Optional[dict]:
         """User-defined metadata of a record as a dictionary containing key-value pairs. Setting a value for an unknown key automatically adds a definition to Preferences > Data."""
-        return RecordDict(self, 'customMetaData')
+        return CustomMetaData(self, 'customMetaData')
 
     @property
     def data(self) -> str:

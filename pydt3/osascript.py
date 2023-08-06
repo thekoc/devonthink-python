@@ -27,7 +27,7 @@ class OSAObjProxy:
         self._osaobj_rc[id(script)][obj_id] += 1 
     
     @property
-    def associsated_application(self) -> Optional['Application']:
+    def binded_application(self) -> Optional['Application']:
         return self._associsated_application
 
     def get_property_raw(self, name: str):
@@ -38,7 +38,7 @@ class OSAObjProxy:
         self.script.set_properties_values(self.obj_id, {name: value})
 
     def get_property_native(self, name: str):
-        pyobj = self.json_to_pyobj(self.script, self.get_property_raw(name), self.associsated_application)
+        pyobj = self.json_to_pyobj(self.script, self.get_property_raw(name), self.binded_application)
         return pyobj
     
     def call_method(self, name: str, args = None, kwargs: dict = None):
@@ -53,9 +53,9 @@ class OSAObjProxy:
 
         params = {'objId': self.obj_id, 'name': name, 'args': args, 'kwargs': kwargs}
         response = self.script.call_json('callMethod', params)
-        pyobj = self.json_to_pyobj(self.script, response, self.associsated_application)
+        pyobj = self.json_to_pyobj(self.script, response, self.binded_application)
         if isinstance(pyobj, OSAObjProxy):
-            pyobj._associsated_application = self.associsated_application
+            pyobj._associsated_application = self.binded_application
         return pyobj
 
     @classmethod

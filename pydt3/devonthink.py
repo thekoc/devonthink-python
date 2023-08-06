@@ -1,12 +1,16 @@
-import os
+from __future__ import annotations
+
+from typing import Optional, Union, List, TYPE_CHECKING
+
 from functools import lru_cache
 from .application import Application
 from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy, OSAObjArray
-from .models.record import Record
-from .models.database import Database
-from .models.text import Text
-from .models.windows import (ThinkWindow, DocumentWindow, ViewerWindow)
-from typing import Optional, Union, List
+
+if TYPE_CHECKING:
+    from .models.record import Record
+    from .models.database import Database
+    from .models.text import Text
+    from .models.windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 
 
 
@@ -369,6 +373,39 @@ class DEVONthink3(Application):
             Record: The record with the specified uuid or item link.
         """
         return self.call_method('getRecordWithUuid', [text], {'in': database})
+    
+    def add_custom_meta_data(self, value, for_: str, to: Record):
+        """Add user-defined metadata to a record. Setting a value for an unknown key automatically adds a definition to Preferences > Data.
+
+           Note that space cannot present in the key's name when adding a new key.
+           This is the limitation set by DEVONthink itself. You should add names
+           with spaces directly in DEVONthink's GUI.
+
+           More details: https://discourse.devontechnologies.com/t/how-to-modify-a-custom-field-value-using-applescript/64384/10
+
+        Args:
+            value (Any): The value to add.
+            for_ (str): The key for the user-defined value.
+            to (Record): The record.
+        """
+        return self.call_method('addCustomMetaData', [value], {'for': for_, 'to': to})
+    
+    def get_custom_meta_data(self, for_: str, from_: Record, default_value=None):
+        """Get user-defined metadata from a record.
+
+        Args:
+            for_ (str): The key of the user-defined value.
+            from_ (Record): The record.
+            default_value (_type_, optional): Default value if user-defined metadata does not yet exist, otherwise a missing value is returned. Defaults to None.
+        """
+        payload = {
+            'for': for_,
+            'from': from_,
+        }
+
+        if default_value is not None:
+            payload['default_value'] = default_value
+        return self.call_method('getCustomMetaData', [], payload)
     
     def __repr__(self):
         return f'<DEVONthink3 {self.id}>'
