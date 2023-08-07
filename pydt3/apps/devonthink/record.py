@@ -25,9 +25,12 @@ class CustomMetaData:
             value = {}
         return value
 
-    def __iter__(self):
-        return iter(self.get_dict_value())
-        
+    def items(self):
+        return self.get_dict_value().items()
+    
+    def asdict(self):
+        return self.get_dict_value()
+    
     def __getitem__(self, key: str) -> Any:
         if isinstance(self.owner.binded_application, DEVONthink3):
             return self.owner.binded_application.get_custom_meta_data(key, self.owner)
