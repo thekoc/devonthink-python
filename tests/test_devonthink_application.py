@@ -4,7 +4,7 @@ import typing
 
 from pydt3 import DEVONthink3
 from pydt3.application import Application
-from pydt3.models.database import Database
+from pydt3.apps.devonthink.database import Database
 from pydt3.osascript import OSAObjArray
 
 logger = logging.getLogger(__name__)

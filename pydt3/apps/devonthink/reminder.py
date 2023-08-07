@@ -1,5 +1,5 @@
 
-from ..osascript import OSAScript, OSAObjProxy
+from ...osascript import OSAScript, OSAObjProxy
 
 class Reminder(OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
@@ -77,5 +77,3 @@ class Reminder(OSAObjProxy):
     @week_of_month.setter
     def week_of_month(self, value: str):
         self.set_property('weekOfMonth', value)
-
-OSAObjProxy._NAME_CLASS_MAP['reminder'] = Reminder

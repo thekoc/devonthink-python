@@ -1,6 +1,6 @@
 
 from typing import List
-from ..osascript import OSAScript, OSAObjProxy
+from ...osascript import OSAScript, OSAObjProxy
 from .record import Record
 from .database import Database
 
@@ -140,7 +140,7 @@ class ThinkWindow(OSAObjProxy):
         """Web archive of the current web page."""
         return self.get_property_native('webArchive')
 
-OSAObjProxy._NAME_CLASS_MAP['thinkWindow'] = ThinkWindow
+
 
 class DocumentWindow(ThinkWindow):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
@@ -151,7 +151,7 @@ class DocumentWindow(ThinkWindow):
         """The record of the visible document."""
         return self.get_property_native('record')
 
-OSAObjProxy._NAME_CLASS_MAP['documentWindow'] = DocumentWindow
+
 
 
 class ViewerWindow(ThinkWindow):
@@ -191,4 +191,5 @@ class ViewerWindow(ThinkWindow):
     def selection(self) -> list:
         """The current selection."""
         raise NotImplementedError()
-OSAObjProxy._NAME_CLASS_MAP['viewerWindow'] = ViewerWindow
+
+

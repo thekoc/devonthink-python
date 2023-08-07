@@ -1,5 +1,5 @@
 from .record import Record
-from ..osascript import OSAObjProxy, OSAScript
+from ...osascript import OSAObjProxy, OSAScript
 
 class SmartGroup(Record):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
@@ -41,5 +41,3 @@ class SmartGroup(Record):
     @search_predicates.setter
     def search_predicates(self, value: str):
         self.set_property('searchPredicates', value)
-
-OSAObjProxy._NAME_CLASS_MAP['smartGroup'] = SmartGroup

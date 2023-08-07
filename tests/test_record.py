@@ -2,8 +2,8 @@ import unittest
 import typing
 import logging
 from pydt3 import DEVONthink3
-from pydt3.models.record import Record
-from pydt3.models.text import Text
+from pydt3.apps.devonthink.record import Record
+from pydt3.apps.devonthink.text import Text
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

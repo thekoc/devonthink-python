@@ -2,15 +2,13 @@ from __future__ import annotations
 
 from typing import Optional, Union, List, TYPE_CHECKING
 
-from functools import lru_cache
-from .application import Application
-from .osascript import OSAScript, DefaultOSAObjProxy, OSAObjProxy, OSAObjArray
+from ...application import Application
+from ...osascript import OSAObjArray
 
 if TYPE_CHECKING:
-    from .models.record import Record
-    from .models.database import Database
-    from .models.text import Text
-    from .models.windows import (ThinkWindow, DocumentWindow, ViewerWindow)
+    from .record import Record
+    from .database import Database
+    from .windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 
 
 

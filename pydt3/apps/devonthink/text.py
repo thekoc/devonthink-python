@@ -1,5 +1,5 @@
 """Not yet implemented."""
-from ..osascript import OSAObjProxy, OSAScript
+from ...osascript import OSAObjProxy, OSAScript
 
 from typing import List, TYPE_CHECKING
 

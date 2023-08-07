@@ -4,8 +4,8 @@ import logging
 import re
 from pydt3 import DEVONthink3
 from pydt3.osascript import OSAScript, OSAObjProxy, OSAObjArray
-from pydt3.models.record import Record
-from pydt3.models.smartgroup import SmartGroup
+from pydt3.apps.devonthink.record import Record
+from pydt3.apps.devonthink.smartgroup import SmartGroup
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

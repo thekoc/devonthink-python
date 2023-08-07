@@ -1,5 +1,5 @@
 
-from ..osascript import OSAScript, OSAObjProxy, OSAObjArray
+from ...osascript import OSAScript, OSAObjProxy, OSAObjArray
 from typing import List
 from .record import Record
 from .smartgroup import SmartGroup
@@ -115,6 +115,3 @@ class Database(OSAObjProxy):
     
     def __repr__(self):
         return f'<Database {self.name}>'
-
-
-OSAObjProxy._NAME_CLASS_MAP['database'] = Database

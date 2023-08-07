@@ -1,8 +1,8 @@
 
-from typing import List, Optional, Any, TYPE_CHECKING
+from typing import Optional, Any, TYPE_CHECKING
 
-from ..devonthink import DEVONthink3
-from ..osascript import OSAScript, OSAObjProxy, OSAObjArray
+from .devonthink import DEVONthink3
+from ...osascript import OSAScript, OSAObjProxy, OSAObjArray
 
 
 if TYPE_CHECKING:
@@ -649,5 +649,3 @@ class Record(OSAObjProxy):
     
     def __repr__(self):
         return f'<Record: {self.name}>'
-
-OSAObjProxy._NAME_CLASS_MAP['record'] = Record
