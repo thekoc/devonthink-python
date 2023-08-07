@@ -200,7 +200,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('creationDate')
 
     @property
-    def custom_meta_data(self) -> Optional[dict]:
+    def custom_meta_data(self) -> Optional[CustomMetaData]:
         """User-defined metadata of a record as a dictionary containing key-value pairs. Setting a value for an unknown key automatically adds a definition to Preferences > Data."""
         return CustomMetaData(self, 'customMetaData')
 

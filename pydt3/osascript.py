@@ -141,6 +141,8 @@ class OSAObjProxy:
 
 T = TypeVar('T')
 class OSAObjArray(Sequence[T], OSAObjProxy):
+    """The proxy of the array container in JXA of type `T`
+    """
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
         super().__init__(script, obj_id, class_name)
         self._cached_array = None
