@@ -1,4 +1,5 @@
 import json
+import os
 from logging import getLogger
 from typing import Any, Optional, TypeVar, Sequence, Generic, TYPE_CHECKING
 from Foundation import NSAppleScript, NSURL, NSAppleEventDescriptor
@@ -6,8 +7,12 @@ from Foundation import NSAppleScript, NSURL, NSAppleEventDescriptor
 
 if TYPE_CHECKING:
     from .application import Application
-
 logger = getLogger(__name__)
+
+
+
+DEFAULT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), 'jxa_helper.scpt')
+
 
 class OSAObjProxy:
     _NAME_CLASS_MAP = {}
@@ -173,6 +178,8 @@ class DefaultOSAObjProxy(OSAObjProxy):
             self.set_property(name, value)
     
 class OSAScript:
+    default: 'OSAScript'
+
     def __init__(self, script: NSAppleScript):
         self.script = script
 
@@ -183,7 +190,8 @@ class OSAScript:
         if error:
             raise RuntimeError(error)
         return cls(script)
-    
+
+
     def call(self, func_name: str, param: str):
         script = self.script
         event = NSAppleEventDescriptor.appleEventWithEventClass_eventID_targetDescriptor_returnID_transactionID_(
@@ -219,6 +227,8 @@ class OSAScript:
     
     def fourcharcode(self, chars: bytes):
         return int.from_bytes(chars, 'big')
+
+OSAScript.default = OSAScript.from_path(DEFAULT_SCRIPT_PATH)
 
 if __name__ == '__main__':
     script = OSAScript.from_path('/Users/koc/Developer/devonthink/python-api/pydt3/test.scpt')

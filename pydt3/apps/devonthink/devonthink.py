@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional, Union, List, TYPE_CHECKING
 
 from ...application import Application
-from ...osascript import OSAObjArray
+from ...osascript import OSAObjArray, OSAScript
 
 if TYPE_CHECKING:
     from .record import Record
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class DEVONthink3(Application):
-    def __init__(self, name="DEVONthink 3") -> None:
-        super().__init__(name)
+    def __init__(self, name="DEVONthink 3", script: OSAScript = None) -> None:
+        super().__init__(name, script)
         self._ext = DevonthinkExtension(self)
 
     @property

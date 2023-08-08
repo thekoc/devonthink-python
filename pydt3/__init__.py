@@ -1,3 +1,4 @@
 from .apps.devonthink import DEVONthink3
+from .osascript import OSAScript
 
-Devonthink3: DEVONthink3 = DEVONthink3
+
