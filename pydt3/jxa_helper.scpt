@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_"­const getObjectId = (() => {
+JsOsaDAS1.001.00bplist00ÑVscript_"ÿconst getObjectId = (() => {
     let count = 0;
     const objIdMap = new WeakMap();
     return (object) => {
@@ -116,8 +116,8 @@ function wrapObjToJson(obj) {
         // TODO: Handle Date
         if (obj instanceof Date) {
             return {
-                type: 'plain',
-                data: obj.toISOString()
+                type: 'date',
+                data: obj.getTime() / 1000
             }
         }
         if (Array.isArray(obj)) {
@@ -204,6 +204,8 @@ function wrapObjToJson(obj) {
 function unwrapObjFromJson(obj) {
     if (obj.type === 'plain') {
         return obj.data;
+    } else if (obj.type === 'date') {
+        return new Date(obj.data * 1000);
     } else if (obj.type === 'array' || obj.type === 'dict') {
         for (let k in obj.data) {
             obj.data[k] = unwrapObjFromJson(obj.data[k]);
@@ -337,4 +339,4 @@ function callSelf(params) {
     let result = obj(...args, kwargs);
     return wrapObjToJson(result);
 }
-callSelf = jsonIOWrapper(callSelf);                              "Ã jscr  úÞÞ­
+callSelf = jsonIOWrapper(callSelf);                              # jscr  úÞÞ­

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import datetime
 from logging import getLogger
 from typing import Any, Optional, TypeVar, Sequence, Generic, TYPE_CHECKING
 from Foundation import NSAppleScript, NSURL, NSAppleEventDescriptor
@@ -69,6 +70,9 @@ class OSAObjProxy:
     def json_to_pyobj(cls, script: 'OSAScript', response: dict, associated_application: Optional['Application'] = None):
         if response['type'] == 'plain':
             return response.get('data')
+        elif response['type'] == 'date':
+            data = response.get('data')
+            return datetime.datetime.fromtimestamp(data)
         elif response['type'] == 'reference':
             class_name = response.get('className', None)
             obj_id = response['objId']
@@ -115,6 +119,11 @@ class OSAObjProxy:
             return {
                 'type': 'plain',
                 'data': obj
+            }
+        elif isinstance(obj, datetime.datetime):
+            return {
+                'type': 'date',
+                'data': obj.timestamp()
             }
         elif isinstance(obj, (list, tuple)):
             return {

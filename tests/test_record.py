@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import typing
 import logging
@@ -57,7 +58,7 @@ class TestRecord(unittest.TestCase):
     def test_addition_date(self):
         for record in self.records:
             addition_date = record.addition_date
-            self.assertTrue(isinstance(addition_date, str))
+            self.assertTrue(isinstance(addition_date, datetime.datetime))
 
     def test_aliases(self):
         for record in self.records:
@@ -69,5 +70,5 @@ class TestRecord(unittest.TestCase):
             all_document_dates = record.all_document_dates
             if all_document_dates is not None:
                 self.assertTrue(isinstance(all_document_dates, typing.Sequence))
-                self.assertTrue(all(isinstance(date, str) for date in all_document_dates))
+                self.assertTrue(all(isinstance(date, datetime.datetime) for date in all_document_dates))
     

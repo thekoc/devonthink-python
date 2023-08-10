@@ -1,3 +1,4 @@
+import datetime
 
 from ...osascript import OSAScript, OSAObjProxy
 
@@ -34,12 +35,13 @@ class Reminder(OSAObjProxy):
         self.set_property('dayOfWeek', value)
 
     @property
-    def due_date(self) -> str:
+    def due_date(self) -> datetime.datetime:
         """Due date."""
         return self.get_property('dueDate')
 
     @due_date.setter
-    def due_date(self, value: str):
+    def due_date(self, value: datetime.datetime):
+        # TODO: Implement this
         raise NotImplementedError()
 
     @property

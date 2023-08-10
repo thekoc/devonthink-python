@@ -1,4 +1,6 @@
 
+import datetime
+
 from typing import Optional, Any, TYPE_CHECKING
 
 from .devonthink import DEVONthink3
@@ -91,7 +93,7 @@ class Record(OSAObjProxy):
 
     # properties
     @property
-    def addition_date(self) -> str:
+    def addition_date(self) -> datetime.datetime:
         """Date when the record was added to the database."""
         return self.get_property_native('additionDate')
 
@@ -105,7 +107,7 @@ class Record(OSAObjProxy):
         self.set_property('aliases', value)
 
     @property
-    def all_document_dates(self) -> Optional[OSAObjArray[str]]:
+    def all_document_dates(self) -> Optional[OSAObjArray[datetime.datetime]]:
         """All dates extracted from text of document, e.g. a scan."""
         return self.get_property_native('allDocumentDates')
 
@@ -195,7 +197,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('contentHash')
 
     @property
-    def creation_date(self) -> str:
+    def creation_date(self) -> datetime.datetime:
         """The creation date of a record."""
         return self.get_property_native('creationDate')
 
@@ -215,7 +217,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('database')
 
     @property
-    def date(self) -> str:
+    def date(self) -> datetime.datetime:
         """The (creation/modification) date of a record."""
         return self.get_property_native('date')
 
@@ -235,7 +237,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('documentAmount')
 
     @property
-    def document_date(self) -> Optional[str]:
+    def document_date(self) -> Optional[datetime.datetime]:
         """First date extracted from text of document, e.g. a scan."""
         return self.get_property_native('documentDate')
 
@@ -424,13 +426,14 @@ class Record(OSAObjProxy):
         return self.get_property_native('mimeType')
 
     @property
-    def modification_date(self) -> str:
+    def modification_date(self) -> datetime.datetime:
         """The modification date of a record."""
         return self.get_property_native('modificationDate')
 
     @modification_date.setter
-    def modification_date(self, value: str):
-        raise NotImplementedError()
+    def modification_date(self, value: datetime.datetime):
+        # TODO: Implement change of modification date
+        raise NotImplementedError
 
     @property
     def name(self) -> str:
@@ -452,7 +455,7 @@ class Record(OSAObjProxy):
         return self.get_property_native('nameWithoutExtension')
 
     @property
-    def newest_document_date(self) -> Optional[str]:
+    def newest_document_date(self) -> Optional[datetime.datetime]:
         """Newest date extracted from text of document, e.g. a scan."""
         return self.get_property_native('newestDocumentDate')
 
@@ -476,12 +479,12 @@ class Record(OSAObjProxy):
         return self.get_property_native('numberOfReplicants')
 
     @property
-    def oldest_document_date(self) -> Optional[str]:
+    def oldest_document_date(self) -> Optional[datetime.datetime]:
         """Oldest date extracted from text of document, e.g. a scan."""
         return self.get_property_native('oldestDocumentDate')
 
     @property
-    def opening_date(self) -> Optional[str]:
+    def opening_date(self) -> Optional[datetime.datetime]:
         """Date when a content was opened the last time or when a feed was refreshed the last time."""
         return self.get_property_native('openingDate')
 
