@@ -298,6 +298,30 @@ function releaseObject(params) {
 }
 releaseObject = jsonIOWrapper(releaseObject);
 
+function evalJXACodeSnippet(params) {
+    params = unwrapObjFromJson(params);
+    let source = params.source;
+    let locals = params.locals;
+    for (let k in locals) {
+        eval(`var ${k} = locals[k];`);
+    }
+    return wrapObjToJson(eval(source));
+}
+evalJXACodeSnippet = jsonIOWrapper(evalJXACodeSnippet);
+
+
+function evalAppleScriptCodeSnippet(params) {
+    params = unwrapObjFromJson(params);
+    let source = params.source;
+    let app = Application.currentApplication();
+    app.includeStandardAdditions = true;
+
+    let result = app.runScript(source, {in: 'AppleScript'});
+    return wrapObjToJson(result);
+}
+evalAppleScriptCodeSnippet = jsonIOWrapper(evalAppleScriptCodeSnippet);
+
+
 function callSelf(params) {
     let objId = params.objId;
     let args = params.args;

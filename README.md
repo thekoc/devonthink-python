@@ -80,7 +80,6 @@ record = dtp3.create_record_with({
 }, inbox)
 ```
 
-
 ## Requirements
 
 - DEVONthink 3
@@ -88,7 +87,6 @@ record = dtp3.create_record_with({
 - PyObjC
 
 (See `requirements.txt` for more information.)
-
 
 ## Work With ChatGPT
 

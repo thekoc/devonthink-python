@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Union, List, TYPE_CHECKING
 
-from ...application import Application
+from ...application import Application, ApplicationExtension
 from ...osascript import OSAObjArray, OSAScript
 
 if TYPE_CHECKING:
@@ -187,7 +187,7 @@ class DEVONthink3(Application):
         """Go to next step of a progress."""
         return self.call_method('stepProgressIndicator', [title])
 
-    def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> List[Record]:
+    def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> OSAObjArray[Record]:
         """Search for records in specified group or all databases.
 
         Args:
@@ -408,9 +408,9 @@ class DEVONthink3(Application):
     def __repr__(self):
         return f'<DEVONthink3 {self.id}>'
 
-class DevonthinkExtension:
+class DevonthinkExtension(ApplicationExtension):
     def __init__(self, app: DEVONthink3):
-        self.app = app
+        super().__init__(app)
     
     def db_by_name(self, name: str) -> Optional[Database]:
         dbs = self.app.databases

@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_÷const getObjectId = (() => {
+JsOsaDAS1.001.00bplist00ÑVscript_"­const getObjectId = (() => {
     let count = 0;
     const objIdMap = new WeakMap();
     return (object) => {
@@ -298,6 +298,30 @@ function releaseObject(params) {
 }
 releaseObject = jsonIOWrapper(releaseObject);
 
+function evalJXACodeSnippet(params) {
+    params = unwrapObjFromJson(params);
+    let source = params.source;
+    let locals = params.locals;
+    for (let k in locals) {
+        eval(`var ${k} = locals[k];`);
+    }
+    return wrapObjToJson(eval(source));
+}
+evalJXACodeSnippet = jsonIOWrapper(evalJXACodeSnippet);
+
+
+function evalAppleScriptCodeSnippet(params) {
+    params = unwrapObjFromJson(params);
+    let source = params.source;
+    let app = Application.currentApplication();
+    app.includeStandardAdditions = true;
+
+    let result = app.runScript(source, {in: 'AppleScript'});
+    return wrapObjToJson(result);
+}
+evalAppleScriptCodeSnippet = jsonIOWrapper(evalAppleScriptCodeSnippet);
+
+
 function callSelf(params) {
     let objId = params.objId;
     let args = params.args;
@@ -313,4 +337,4 @@ function callSelf(params) {
     let result = obj(...args, kwargs);
     return wrapObjToJson(result);
 }
-callSelf = jsonIOWrapper(callSelf);                                jscr  úÞÞ­
+callSelf = jsonIOWrapper(callSelf);                              "Ã jscr  úÞÞ­

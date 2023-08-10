@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 from logging import getLogger
@@ -108,7 +110,7 @@ class OSAObjProxy:
             }
     
     @classmethod
-    def pyobj_to_json(cls, obj):
+    def pyobj_to_json(cls, obj) -> dict:
         if isinstance(obj, (int, float, str, bool, type(None))):
             return {
                 'type': 'plain',
@@ -191,8 +193,7 @@ class OSAScript:
             raise RuntimeError(error)
         return cls(script)
 
-
-    def call(self, func_name: str, param: str):
+    def _call(self, func_name: str, param: str):
         script = self.script
         event = NSAppleEventDescriptor.appleEventWithEventClass_eventID_targetDescriptor_returnID_transactionID_(
             self.fourcharcode(b'ascr'), self.fourcharcode(b'psbr'), NSAppleEventDescriptor.nullDescriptor(), 0, 0)
@@ -208,10 +209,10 @@ class OSAScript:
         else:
             return result.stringValue()
     
-    def call_json(self, func_name: str, param: dict):
-        param_str = json.dumps(param)
-        logger.debug(f'call_json func_name {func_name} param: {param_str}')
-        result = self.call(func_name, param_str)
+    def call_json(self, func_name: str, params: dict):
+        param_str = json.dumps(params)
+        logger.debug(f'call_json func_name {func_name} params: {param_str}')
+        result = self._call(func_name, param_str)
         logger.debug(f'call_json result: {result}')
         return json.loads(result)
     
@@ -232,4 +233,4 @@ OSAScript.default = OSAScript.from_path(DEFAULT_SCRIPT_PATH)
 
 if __name__ == '__main__':
     script = OSAScript.from_path('/Users/koc/Developer/devonthink/python-api/pydt3/test.scpt')
-    print(script.call('echo', 'hello world'))
+    print(script._call('echo', 'hello world'))

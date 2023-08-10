@@ -1,11 +1,13 @@
 from functools import lru_cache
 
-from .osascript import OSAScript, DefaultOSAObjProxy
+from .osascript import OSAScript, OSAObjProxy, DefaultOSAObjProxy
 
 class Application(DefaultOSAObjProxy):
     def __init__(self, name: str, script: OSAScript = None):
         if script is None:
-            script = OSAScript.default
+            self.script = OSAScript.default
+        else:
+            self.script = script
         response = self.script.call_json('getApplication', {'name': name})
         super().__init__(self.script, response['objId'], response['className'])
         self._associsated_application = self
@@ -33,3 +35,29 @@ class Application(DefaultOSAObjProxy):
     def parent_of_class(self, name: str):
         """Get the parent of the application of the specified class."""
         return self.call_method('parentOfClass', args=[name])
+
+class ApplicationExtension:
+    def __init__(self, app: Application):
+        self.app = app
+
+    def eval_jxa_code_snippet(self, source: str, locals: dict = None):
+        """Evaluate a JXA code piece."""
+        if locals is None:
+            locals = {}
+        script = self.app.script
+        payload = {
+            'source': source,
+            'locals': locals
+        }
+        payload = OSAObjProxy.pyobj_to_json( payload)
+        return OSAObjProxy.json_to_pyobj(script, script.call_json('evalJXACodeSnippet', payload))
+    
+    def eval_applescript_code_snippet(self, source: str):
+        """Evaluate an AppleScript code piece."""
+        script = self.app.script
+        payload = {
+            'source': source,
+        }
+        payload = OSAObjProxy.pyobj_to_json(payload)
+        return OSAObjProxy.json_to_pyobj(script, script.call_json('evalAppleScriptCodeSnippet', params=payload))
+    
