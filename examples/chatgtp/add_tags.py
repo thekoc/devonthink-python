@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import openai
 import tiktoken
 import re
@@ -95,7 +97,7 @@ def truncate_content(content) -> list[str]:
     content = enc.decode(first_tokens + middle_tokens + last_tokens)
     return content
 
-def generate_tags(content) -> list[str]:
+def generate_tags(content) -> 'list[str]':
     content = truncate_content(content)
     print(content)
     prompt = """Please analyze the following text and provide < 10 tags separated by commas. Output only the tags and nothing else.  If there are any errors, starts with "!!!"""
