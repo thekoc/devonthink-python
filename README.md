@@ -5,6 +5,7 @@ This project aims to let you use Python to interact with DEVONthink 3 with ease.
 Ulike many other API wrapper projects, PyDT3 is documented through docstring. Therefore can benefit from code completion and documentation in code editors.
 
 ![documentation-in-editor-2](https://github.com/thekoc/devonthink-python/raw/main/images/docstring_example_2.png)
+![documentation-in-editor-3](https://github.com/thekoc/devonthink-python/raw/main/images/docstring_example_3.png)
 
 To install, just run
 
