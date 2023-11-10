@@ -1,5 +1,6 @@
 """Not yet implemented."""
-from ...osascript import OSAObjProxy, OSAScript
+from ...osascript import OSAScript
+from ...helper_bridging import OSAObjProxy
 
 from typing import List, TYPE_CHECKING
 
@@ -66,5 +67,3 @@ class Text(OSAObjProxy):
     @size.setter
     def size(self, value: int):
         self.set_property('size', value)
-
-OSAObjProxy._NAME_CLASS_MAP['text'] = Text

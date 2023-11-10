@@ -1,6 +1,7 @@
 from functools import lru_cache
 
-from .osascript import OSAScript, OSAObjProxy, DefaultOSAObjProxy
+from .osascript import OSAScript
+from .helper_bridging import OSAObjProxy, DefaultOSAObjProxy
 
 class Application(DefaultOSAObjProxy):
     def __init__(self, name: str, script: OSAScript = None):
