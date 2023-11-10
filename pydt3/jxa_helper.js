@@ -37,7 +37,7 @@ function jsonIOWrapper(func) {
 const getAssociatedApplication = (() => {
     const appCache = {};
     return function getAssociatedApplication(obj) {
-        let displayString = Automation.getDisplayString(window);
+        let displayString = Automation.getDisplayString(obj);
         let m = displayString.match(/^Application\(['"]([^)]*)['"]\)/);
         if (m) {
             let name = m[1];
