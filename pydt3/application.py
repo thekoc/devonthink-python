@@ -8,6 +8,7 @@ class Application(DefaultOSAObjProxy):
             self._helper_script = HelperScript.default
         else:
             self._helper_script = script
+        self.obj_id = None
         response = self._helper_script.get_application(name)
         super().__init__(self._helper_script, response.obj_id, response.class_name)
         self._helper_script = self._helper_script.within_application(self)
@@ -16,21 +17,21 @@ class Application(DefaultOSAObjProxy):
     @property
     def id(self) -> str:
         """The unique identifier of the application."""
-        return self._get_property('id')()
+        return self._call_method('id')
     
     @property
     def name(self) -> str:
         """The name of the application."""
-        return self._get_property('name')() # The name is a function so it needs special handling
+        return self._call_method('name') # The name is a function so it needs special handling
 
     @property
     def frontmost(self):
         """Whether the application is currently frontmost."""
-        return self._get_property('frontmost')()
+        return self._call_method('frontmost')
 
     def activate(self):
         """Activate the application."""
-        self._call_method('activate')
+        return self._call_method('activate')
 
     @lru_cache(maxsize=64)
     def parent_of_class(self, name: str):

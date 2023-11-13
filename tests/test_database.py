@@ -118,7 +118,7 @@ class TestDatabase(unittest.TestCase):
     def test_uuid(self):
         for db in self.dbs:
             uuid = db.uuid
-            self.assertTrue(isinstance(uuid, str))
+            self.assertTrue(isinstance(uuid, str), f"{db.name} has uuid {type(uuid)}")
 
 if __name__ == '__main__':
     unittest.main()

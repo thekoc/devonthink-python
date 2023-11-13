@@ -36,7 +36,7 @@ class SmartGroup(Record):
     @property
     def search_predicates(self) -> str:
         """A string representation of the conditions of the smart group."""
-        return self._get_property('searchPredicates')
+        return self._call_method('searchPredicates')
 
     @search_predicates.setter
     def search_predicates(self, value: str):

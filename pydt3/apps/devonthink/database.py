@@ -44,7 +44,7 @@ class Database(OSAObjProxy):
     @property
     def comment(self) -> str:
         """The comment of the database."""
-        return self._get_property('comment')
+        return self._call_method('comment')
     
     @comment.setter
     def comment(self, value: str):
@@ -73,7 +73,7 @@ class Database(OSAObjProxy):
     @property
     def name(self) -> str:
         """The name of the database."""
-        return self._get_property('name')
+        return self._call_method('name')
     
     @name.setter
     def name(self, value: str):
@@ -82,7 +82,7 @@ class Database(OSAObjProxy):
     @property
     def path(self) -> str:
         """The POSIX path of the database."""
-        return self._get_property('path')
+        return self._call_method('path')
 
     @property
     def read_only(self) -> bool:
@@ -112,7 +112,7 @@ class Database(OSAObjProxy):
     @property
     def uuid(self) -> str:
         """The unique and persistent identifier of a database for external referencing."""
-        return self._get_property('uuid')
+        return self._call_method('uuid')
     
     def __repr__(self):
         return f'<Database {self.name}>'

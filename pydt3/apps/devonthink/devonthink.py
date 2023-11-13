@@ -95,7 +95,7 @@ class DEVONthink3(Application):
     @property
     def last_downloaded_URL(self) -> str:
         """The actual URL of the last download."""
-        return self._get_property('lastDownloadedURL')
+        return self._call_method('lastDownloadedURL')
 
     @property
     def last_downloaded_response(self) -> Optional[Record]:

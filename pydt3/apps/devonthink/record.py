@@ -96,12 +96,12 @@ class Record(OSAObjProxy):
     @property
     def addition_date(self) -> datetime.datetime:
         """Date when the record was added to the database."""
-        return self._get_property('additionDate')
+        return self._call_method('additionDate')
 
     @property
     def aliases(self) -> str:
         """Wiki aliases (separated by commas or semicolons) of a record."""
-        return self._get_property('aliases')
+        return self._call_method('aliases')
 
     @aliases.setter
     def aliases(self, value: str):
@@ -110,7 +110,7 @@ class Record(OSAObjProxy):
     @property
     def all_document_dates(self) -> Optional[OSAObjArray[datetime.datetime]]:
         """All dates extracted from text of document, e.g. a scan."""
-        return self._get_property('allDocumentDates')
+        return self._call_method('allDocumentDates')
 
     @property
     def altitude(self) -> float:
@@ -138,7 +138,7 @@ class Record(OSAObjProxy):
     @property
     def attached_script(self) -> str:
         """POSIX path of script attached to a record."""
-        return self._get_property('attachedScript')
+        return self._call_method('attachedScript')
 
     @attached_script.setter
     def attached_script(self, value: str):
@@ -186,7 +186,7 @@ class Record(OSAObjProxy):
     @property
     def comment(self) -> str:
         """The comment of a record."""
-        return self._get_property('comment')
+        return self._call_method('comment')
 
     @comment.setter
     def comment(self, value: str):
@@ -210,7 +210,7 @@ class Record(OSAObjProxy):
     @property
     def data(self) -> str:
         """The file data of a record. Currently only supported by PDF documents, images, rich texts and web archives."""
-        return self._get_property('data')
+        return self._call_method('data')
 
     @property
     def database(self) -> 'Database':
@@ -245,7 +245,7 @@ class Record(OSAObjProxy):
     @property
     def document_name(self) -> str:
         """Name based on text or properties of document"""
-        return self._get_property('documentName')
+        return self._call_method('documentName')
 
     @property
     def dpi(self) -> int:
@@ -267,11 +267,6 @@ class Record(OSAObjProxy):
     def encrypted(self) -> bool:
         """Specifies if a document is encrypted or not. Currently only supported by PDF documents."""
         return self._get_property('encrypted')
-
-    @property
-    def filename(self) -> str:
-        """The current filename of a record."""
-        return self._get_property('filename')
 
     @property
     def exclude_from_classification(self) -> bool:
@@ -321,7 +316,7 @@ class Record(OSAObjProxy):
     @property
     def filename(self) -> str:
         """The current filename of a record."""
-        return self._get_property('filename')
+        return self._call_method('filename')
 
     @property
     def geolocation(self) -> Optional[str]:
@@ -388,7 +383,7 @@ class Record(OSAObjProxy):
     def location(self) -> str:
         """The primary location in the database as a POSIX path (/ in names is replaced with \/). 
         This is the location of the first parent group."""
-        return self._get_property('location')
+        return self._call_method('location')
 
     @property
     def location_group(self) -> 'Record':
@@ -438,7 +433,7 @@ class Record(OSAObjProxy):
     @property
     def name(self) -> str:
         """The name of a record."""
-        return self._get_property('name')
+        return self._call_method('name')
 
     @name.setter
     def name(self, value: str):
@@ -447,12 +442,12 @@ class Record(OSAObjProxy):
     @property
     def name_without_date(self) -> str:
         """The name of a record without any dates."""
-        return self._get_property('nameWithoutDate')
+        return self._call_method('nameWithoutDate')
 
     @property
     def name_without_extension(self) -> str:
         """The name of a record without a file extension (independent of preferences)."""
-        return self._get_property('nameWithoutExtension')
+        return self._call_method('nameWithoutExtension')
 
     @property
     def newest_document_date(self) -> Optional[datetime.datetime]:
@@ -501,7 +496,7 @@ class Record(OSAObjProxy):
     @property
     def path(self) -> str:
         """The POSIX file path of a record. Only the path of external records can be changed."""
-        return self._get_property('path')
+        return self._call_method('path')
     
     @path.setter
     def path(self, value: str):
@@ -515,7 +510,7 @@ class Record(OSAObjProxy):
     @property
     def plain_text(self) -> str:
         """The plain text of a record."""
-        return self._get_property('plainText')
+        return self._call_method('plainText')
     
     @plain_text.setter
     def plain_text(self, value: str):
@@ -524,7 +519,7 @@ class Record(OSAObjProxy):
     @property
     def proposed_filename(self) -> str:
         """The proposed filename for a record."""
-        return self._get_property('proposedFilename')
+        return self._call_method('proposedFilename')
 
     @property
     def rating(self) -> int:
@@ -541,7 +536,7 @@ class Record(OSAObjProxy):
         Append ?page= to specify the zero-based index of a page of a PDF document,
         ?time= to specify the time of a movie or ?search= to specify a string to search.
         """
-        return self._get_property('referenceURL')
+        return self._call_method('referenceURL')
 
     @property
     def reminder(self) -> Optional['Reminder']:
@@ -572,7 +567,7 @@ class Record(OSAObjProxy):
     @property
     def source(self) -> str:
         """The HTML/XML source of a record if available or the record converted to HTML if possible."""
-        return self._get_property('source')
+        return self._call_method('source')
 
     @property
     def state(self) -> bool:
@@ -591,12 +586,12 @@ class Record(OSAObjProxy):
     @property
     def tag_type(self) -> str:
         """The tag type of a record."""
-        return self._get_property('tagType')
+        return self._call_method('tagType')
 
     @property
     def tags(self) -> OSAObjArray[str]:
         """The tags of a record."""
-        return self._get_property('tags')
+        return self._call_method('tags')
 
     @tags.setter
     def tags(self, value: list):
@@ -617,7 +612,7 @@ class Record(OSAObjProxy):
         The type of a record. ("bookmark"/‌"feed"/‌"formatted note"/‌"group"/‌"html"/‌"markdown"/‌"PDF document"/‌"picture"/‌"plist"/‌"quicktime"/‌"rtf"/‌"rtfd"/‌"script"/‌"sheet"/‌"smart group"/‌"txt"/‌"unknown"/‌"webarchive"/‌"xml")
         Note: In compiled menu/toolbar scripts you might have to use a string representation of the type for comparisons.
         """
-        return self._get_property('type')
+        return self._call_method('type')
 
     @property
     def unread(self) -> bool:
@@ -631,12 +626,12 @@ class Record(OSAObjProxy):
     @property
     def url(self) -> str:
         """The URL of a record."""
-        return self._get_property('url')
+        return self._call_method('url')
 
     @property
     def uuid(self) -> str:
         """The unique and persistent identifier of a record."""
-        return self._get_property('uuid')
+        return self._call_method('uuid')
 
     @property
     def web_archive(self):

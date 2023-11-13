@@ -4,6 +4,7 @@ import typing
 import logging
 from pydt3 import DEVONthink3
 from pydt3.apps.devonthink.record import Record
+from pydt3.apps.devonthink.reminder import Reminder
 from pydt3.apps.devonthink.text import Text
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,8 @@ class TestRecord(unittest.TestCase):
             self.assertTrue(isinstance(record.path, str))
             self.assertTrue(isinstance(record.plain_text, str))
             self.assertTrue(isinstance(record.rich_text, (Text, type(None))))
+            self.assertTrue(isinstance(record.reminder, (Reminder, type(None))))
+            self.assertTrue(isinstance(record.type, str))
     
     def test_children(self):
         for record in self.records:
@@ -65,8 +68,16 @@ class TestRecord(unittest.TestCase):
             aliases = record.aliases
             self.assertTrue(isinstance(aliases, str))
 
+
+    def test_tags(self):
+        for record in self.records:
+            tags = record.tags
+            self.assertTrue(isinstance(tags, typing.Sequence))
+            self.assertTrue(all(isinstance(tag, str) for tag in tags))
+    
     def test_all_document_dates(self):
         for record in self.records:
+            # record: Record
             all_document_dates = record.all_document_dates
             if all_document_dates is not None:
                 self.assertTrue(isinstance(all_document_dates, typing.Sequence))

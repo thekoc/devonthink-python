@@ -42,6 +42,7 @@ class OSAObjProxy:
         return self._helper_script.call_method(self, name, args, kwargs)
 
     def __del__(self):
+        return
         if self._helper_script._osaobj_rc.get(self.obj_id) is None:
             return
         self._helper_script._osaobj_rc[self.obj_id] -= 1
@@ -115,8 +116,6 @@ class HelperScript(OSAScript):
                 current_class_name = class_name
                 reference_cls = None
                 while current_class_name is not None:
-                    logger.debug(f'current_class_name: {current_class_name}')
-                    # logger.debug(f'current application: {associated_application.name}')
                     reference_cls = self._NAME_CLASS_MAP.get(current_class_name)
                     if reference_cls is not None:
                         break

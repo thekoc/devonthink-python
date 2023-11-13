@@ -11,7 +11,7 @@ class Reminder(OSAObjProxy):
     @property
     def alarm(self) -> str:
         """Alarm of reminder."""
-        return self._get_property('alarm')
+        return self._call_method('alarm')
 
     @alarm.setter
     def alarm(self, value: str):
@@ -20,7 +20,7 @@ class Reminder(OSAObjProxy):
     @property
     def alarm_string(self) -> str:
         """Name of sound, text to speak, text of alert/notification, source/path of script or recipient of email. Text can also contain placeholders."""
-        return self._get_property('alarmString')
+        return self._call_method('alarmString')
 
     @alarm_string.setter
     def alarm_string(self, value: str):
@@ -29,7 +29,7 @@ class Reminder(OSAObjProxy):
     @property
     def day_of_week(self) -> str:
         """Scheduled day of week."""
-        return self._get_property('dayOfWeek')
+        return self._call_method('dayOfWeek')
 
     @day_of_week.setter
     def day_of_week(self, value: str):
@@ -66,7 +66,7 @@ class Reminder(OSAObjProxy):
     @property
     def schedule(self) -> str:
         """Schedule of reminder."""
-        return self._get_property('schedule')
+        return self._call_method('schedule')
 
     @schedule.setter
     def schedule(self, value: str):
@@ -75,7 +75,7 @@ class Reminder(OSAObjProxy):
     @property
     def week_of_month(self) -> str:
         """Scheduled week of month."""
-        return self._get_property('weekOfMonth')
+        return self._call_method('weekOfMonth')
 
     @week_of_month.setter
     def week_of_month(self, value: str):

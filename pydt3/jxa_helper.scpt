@@ -1,4 +1,5 @@
-JsOsaDAS1.001.00bplist00ÑVscript_#§class ObjectPoolManager {
+JsOsaDAS1.001.00bplist00ÑVscript_'
+class ObjectPoolManager {
     constructor() {
         this._currentId = 0;
         this._objectIdMap = new Map();
@@ -30,6 +31,7 @@ class Util {
         let displayString = Automation.getDisplayString(obj);
         let m = displayString.match(/^Application\(['"]([^)]*)['"]\)/);
         if (m) {
+            let name = m[1];
             return Application(name);
         }
         return null;
@@ -51,16 +53,19 @@ class Util {
             return undefined;
         }
         let specifierClass = undefined;
+        let classOf = ObjectSpecifier.classOf(specifier);
+        if (classOf === 'application') {
+            return 'application';
+        }
         if (this.guessIsSpecifierContainer(specifier)) {
-            specifierClass = ObjectSpecifier.classOf(specifier);
-            return 'array::' + specifierClass;
+            return 'array::' + classOf;
         }
         try {
             specifierClass = specifier.class();
         } catch (e) {
             if (e.errorNumber === -1700) {
                 // The object is not a specifier.
-                return undefined;
+                return classOf;
             }
         }
 
@@ -111,6 +116,65 @@ class JsonTranslator {
             }
         }
 
+        if (ObjectSpecifier.hasInstance(obj)) {
+            let guessClass = Util.guessClassOfSpecifier(obj);
+            if (guessClass === undefined) {
+                // The object is a specifier but we don't know its class.
+                // This could mean that the object is a reference to a primitive value.
+                // eg. a `number`, `bool` or `string`.
+                // In that case, the best we can do is to return the evaluated value.
+                let evaluated = obj();
+                if (Util.isJsonNode(evaluated)) {
+                    return {
+                        type: 'plain',
+                        data: evaluated
+                    };
+                } else {
+                    return {
+                        type: 'reference',
+                        objId: this.objectPoolManager.getId(obj),
+                        plainRepr: null,
+                        className: 'unknown'
+                    }
+                }
+            }
+
+            if (guessClass === 'application') {
+                return {
+                    type: 'reference',
+                    objId: this.objectPoolManager.getId(obj),
+                    plainRepr: null,
+                    className: 'application'
+                }
+            }
+
+            if (guessClass.startsWith('array::')) {
+                return {
+                    type: 'reference',
+                    objId: this.objectPoolManager.getId(obj),
+                    plainRepr: null,
+                    className: guessClass
+                }
+            }
+
+            // If the evaluated object is a plain object, return the evaluated value.
+            // WARNING: This may cause problems if the object is a reference to a text or dict.
+            //          In that case, the object "can" be interpreted as a plain object but still
+            //          has properties that are references to other objects.
+            // let evaluated = obj();
+            // if (!Util.isPlainJson(evaluated)) {
+            //     evaluated = null;
+            // }
+
+            return {
+                type: 'reference',
+                objId: this.objectPoolManager.getId(obj),
+                className: guessClass,
+                plainRepr: null
+            }
+        }
+
+
         if (typeof obj === 'object') {
             // TODO: Handle Date
             if (obj instanceof Date) {
@@ -143,51 +207,6 @@ class JsonTranslator {
             throw new Error(`wrapObjToJson: Unknown type: ${typeof obj}`);
         }
 
-        if (ObjectSpecifier.hasInstance(obj)) {
-            let guessClass = Util.guessClassOfSpecifier(obj);
-            if (guessClass === undefined) {
-                // The object is a specifier but we don't know its class.
-                // This could mean that the object is a reference to a primitive value.
-                // eg. a `number`, `bool` or `string`.
-                // In that case, the best we can do is to return the evaluated value.
-                let evaluated = obj();
-                return this.wrapToJson(evaluated);
-            }
-
-            if (guessClass === 'application') {
-                return {
-                    type: 'reference',
-                    objId: this.objectPoolManager.getId(obj),
-                    plainRepr: null,
-                    className: 'application'
-                }
-            }
-
-            if (guessClass.startsWith('array::')) {
-                return {
-                    type: 'reference',
-                    objId: this.objectPoolManager.getId(obj),
-                    plainRepr: null,
-                    className: guessClass
-                }
-            }
-
-            // If the evaluated object is a plain object, return the evaluated value.
-            // WARNING: This may cause problems if the object is a reference to a text or dict.
-            //          In that case, the object "can" be interpreted as a plain object but still
-            //          has properties that are references to other objects.
-            let evaluated = obj();
-            if (!Util.isPlainJson(evaluated)) {
-                evaluated = null;
-            }
-
-            return {
-                type: 'reference',
-                objId: this.objectPoolManager.getId(obj),
-                className: guessClass,
-                plainRepr: evaluated
-            }
-        }
 
         if (typeof obj === 'function') {
             return {
@@ -249,9 +268,10 @@ function releaseObjectWithId({id}) {
 releaseObjectWithId = jsonTranslator.strIOFuncWrapper(releaseObjectWithId);
 
 function getApplication({name}) {
-    let app = Application(name);
-    app.includeStandardAdditions = true
-    return app;
+    // throw new Error(`Application name: ${name} not found, typeof name: ${typeof name}`);
+    let theApp = Application(name);
+    theApp.includeStandardAdditions = true
+    return theApp;
 }
 getApplication = jsonTranslator.strIOFuncWrapper(getApplication);
 
@@ -261,7 +281,7 @@ function evalJXACodeSnippet({source, locals}) {
     }
     const value = eval(source);
     return {
-        'string': `${value}`
+        'string': JSON.stringify(value)
     }
 }
 evalJXACodeSnippet = jsonTranslator.strIOFuncWrapper(evalJXACodeSnippet);
@@ -299,12 +319,25 @@ function callMethod({obj, name, args, kwargs}) {
     if (method === undefined) {
         throw new Error(`Method not found: ${name}`);
     }
-    method = method.bind(obj);
-    return method(...args, kwargs);
+    if (Util.isMethod(method)) {
+        method = method.bind(obj);
+
+    }
+    if (args === null || args === undefined) {
+        args = [];
+    }
+
+    if (kwargs === null || kwargs === undefined) {
+        return method(...args);
+    } else {
+        return method(...args, kwargs);
+    }
+
+    
 }
 callMethod = jsonTranslator.strIOFuncWrapper(callMethod);
 
 function callSelf({obj, args, kwargs}) {
     return obj(...args, kwargs);
 }
-callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              #½ jscr  úÞÞ­
+callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              ' jscr  úÞÞ­

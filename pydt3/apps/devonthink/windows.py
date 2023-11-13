@@ -3,6 +3,7 @@ from typing import List
 from ...osascript import OSAScript
 from ...helper_bridging import OSAObjProxy
 from .record import Record
+from .text import Text
 from .database import Database
 
 class ThinkWindow(OSAObjProxy):
@@ -73,12 +74,12 @@ class ThinkWindow(OSAObjProxy):
     @property
     def paginated_pdf(self) -> str:
         """A printed PDF with pagination of the visible document."""
-        return self._get_property('paginatedPDF')
+        return self._call_method('paginatedPDF')
 
     @property
     def pdf(self) -> str:
         """A PDF without pagination of the visible document retaining the screen layout."""
-        return self._get_property('pdf')
+        return self._call_method('pdf')
 
     @property
     def selected_column(self) -> int:
@@ -109,7 +110,7 @@ class ThinkWindow(OSAObjProxy):
         return self._get_property('selectedRows')
 
     @property
-    def selected_text(self) -> str:
+    def selected_text(self) -> Text:
         """The text container for the selection of the window."""
         return self._get_property('selectedText')
     
@@ -123,14 +124,14 @@ class ThinkWindow(OSAObjProxy):
         return self._get_property('source')
 
     @property
-    def text(self) -> str:
+    def text(self) -> Text:
         """The text container of the window."""
         return self._get_property('text')
 
     @property
     def url(self) -> str:
         """The URL of the current web page. In addition, setting the URL can be used to load a web page."""
-        return self._get_property('url')
+        return self._call_method('url')
 
     @url.setter
     def url(self, value: str):
@@ -139,7 +140,7 @@ class ThinkWindow(OSAObjProxy):
     @property
     def web_archive(self) -> str:
         """Web archive of the current web page."""
-        return self._get_property('webArchive')
+        return self._call_method('webArchive')
 
 
 
@@ -177,7 +178,7 @@ class ViewerWindow(ThinkWindow):
     @property
     def search_query(self) -> str:
         """The search query. Setting the query performs a search."""
-        return self._get_property('searchQuery')
+        return self._call_method('searchQuery')
 
     @search_query.setter
     def search_query(self, value: str):

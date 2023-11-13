@@ -23,6 +23,13 @@ class TestDEVONhinkApplication(unittest.TestCase):
     def test_name(self):
         self.assertTrue(self.app.name == 'DEVONthink 3')
     
+    def test_activate(self):
+        self.app.activate()
+        self.assertTrue(self.app.frontmost, True)
+    
+    def test_frontmost(self):
+        self.assertTrue(isinstance(self.app.frontmost, bool))
+    
     def test_databases(self):
         dbs  = self.app.databases
         self.assertTrue(isinstance(dbs, OSAObjArray))
