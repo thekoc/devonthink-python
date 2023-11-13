@@ -15,10 +15,10 @@ class TestRecord(unittest.TestCase):
         super().__init__(methodName)
         dbs = DEVONthink3().databases
         assert len(dbs) > 0, "No databases found"
-        print("AAAA")
-        print(dbs[0].name)
+        logger.info(f"Found {len(dbs)} databases")
         self.dbs = dbs
         self.records = [record for db in dbs for record in db.contents]
+        logger.info(f"Found {len(self.records)} records")
     
     def test_general(self):
         record: Record

@@ -1,23 +1,27 @@
 class ObjectPoolManager {
     constructor() {
         this._currentId = 0;
-        this._obj = {};
-        this._objectIdMap = new WeakMap();
+        this._objectIdMap = new Map();
+        this._idObjectMap = new Map();
     }
+
     getObject(id) {
-        return this._pool[id];
+        return this._idObjectMap.get(id);
     }
 
     getId(obj) {
-        if (!this._objIdMap.has(obj)) {
-            this.currentId += 1;
-            map.set(object, this.currentId);
+        if (!this._objectIdMap.has(obj)) {
+            this._currentId += 1;
+            this._objectIdMap.set(obj, this._currentId);
+            this._idObjectMap.set(this._currentId, obj);
         }
-        return map.get(object);
+        return this._currentId;
     }
 
     releaseObjectWithId(objectId) {
-        delete objectCacheMap[objectId];
+        const obj = this.getObject(objectId);
+        this._idObjectMap.delete(objectId);
+        this._objectIdMap.delete(obj);
     }
 }
 
@@ -32,6 +36,7 @@ class Util {
     }
 
     static guessIsSpecifierContainer(specifier) {
+        // If it is an array specifier.
         if (!ObjectSpecifier.hasInstance(specifier)) {
             return false;
         }
@@ -187,7 +192,7 @@ class JsonTranslator {
         if (typeof obj === 'function') {
             return {
                 type: 'reference',
-                objId: this.objectPoolManager.getId(obj)(obj),
+                objId: this.objectPoolManager.getId(obj),
                 className: 'function'
             }
         }
@@ -209,94 +214,97 @@ class JsonTranslator {
             return this.objectPoolManager.getObject(obj.objId);
         }
     }
-}
 
-class ExternalCallHelper {
-    /**
-     * 
-     * @param {ObjectPoolManager} objectPoolManager 
-     * @param {JsonTranslator} jsonTranslator 
-     */
-    constructor(objectPoolManager, jsonTranslator) {
-        this.objectPoolManager = objectPoolManager;
-        this.jsonTranslator = jsonTranslator;
-    }
-
-    externalCall(inputString) {
-        const inputJson = JSON.parse(inputString);
-        const params = this.jsonTranslator.unwrapFromJson(inputJson);
-        const result = this.callMethod(params);
-        const outputJson = this.jsonTranslator.wrapToJson(result);
-        return JSON.stringify(outputJson);
-    }
-
-    callMethod({name, params}) {
-        Exports[name](params);
+    strIOFuncWrapper(func) {
+        return  (strParams) => {
+            let params = JSON.parse(strParams);
+            params = this.unwrapFromJson(params);
+            let result = func(params);
+            result = this.wrapToJson(result);
+            return JSON.stringify(result);
+        }
     }
 }
 
-class Exports {
-    static releaseObjectWithId({id}) {
-        objectPoolManager.releaseObjectWithId(id);
-    }
 
-    static getApplication({name}) {
-        let app = Application(name);
-        app.includeStandardAdditions = true
-        return app;
-    }
-
-    static evalJXACodeSnippet({source, locals}) {
-        for (let k in locals) {
-            eval(`var ${k} = locals[k];`);
-        }
-        return eval(source);
-    }
-
-    static evalAppleScriptCodeSnippet({source}) {
-        let app = Application.currentApplication();
-        app.includeStandardAdditions = true;
-
-        let result = app.runScript(source, {in: 'AppleScript'});
-        return result;
-    }
-
-    static getProperties({object, properties}) {
-        let result = {};
-        for (let k of properties) {
-            result[k] = object[k];
-            if (Util.isMethod(result[k])) {
-                result[k] = result[k].bind(object);
-            }
-        }
-        return result;
-    }
-
-    static setProperties({object, keyValues}) {
-        for (let k in keyValues) {
-            object[k] = keyValues[k];
-        }
-    }
-
-    static callMethod({object, name, args}) {
-        let method = object[name];
-        if (method === undefined) {
-            throw new Error(`Method not found: ${name}`);
-        }
-        return this.callSelf({object: method, args});
-    }
-
-    static callSelf({object, args}) {
-        object(...args);
-    }
-    
-}
 
 const objectPoolManager = new ObjectPoolManager();
 const jsonTranslator = new JsonTranslator(objectPoolManager);
-const externalCallHelper = new ExternalCallHelper(objectPoolManager, jsonTranslator);
 
 
-function externalCall(inputString) {
-    externalCallHelper.externalCall(inputString);
+// const echo = jsonTranslator.strIOFuncWrapper((params) => {
+//     return params;
+// });
+
+function echo(params) {
+    return params;
 }
+echo = jsonTranslator.strIOFuncWrapper(echo);
+
+
+
+function releaseObjectWithId({id}) {
+    objectPoolManager.releaseObjectWithId(id);
+}
+releaseObjectWithId = jsonTranslator.strIOFuncWrapper(releaseObjectWithId);
+
+function getApplication({name}) {
+    let app = Application(name);
+    app.includeStandardAdditions = true
+    return app;
+}
+getApplication = jsonTranslator.strIOFuncWrapper(getApplication);
+
+function evalJXACodeSnippet({source, locals}) {
+    for (let k in locals) {
+        eval(`var ${k} = locals[k];`);
+    }
+    const value = eval(source);
+    return {
+        'string': JSON.stringify(value)
+    }
+}
+evalJXACodeSnippet = jsonTranslator.strIOFuncWrapper(evalJXACodeSnippet);
+
+function evalAppleScriptCodeSnippet({source}) {
+    let app = Application.currentApplication();
+    app.includeStandardAdditions = true;
+
+    let result = app.runScript(source, {in: 'AppleScript'});
+    return result;
+}
+evalAppleScriptCodeSnippet = jsonTranslator.strIOFuncWrapper(evalAppleScriptCodeSnippet);
+
+function getProperties({obj, properties}) {
+    let result = {};
+    for (let k of properties) {
+        result[k] = obj[k];
+        if (Util.isMethod(result[k])) {
+            result[k] = result[k].bind(obj);
+        }
+    }
+    return result;
+}
+getProperties = jsonTranslator.strIOFuncWrapper(getProperties);
+
+function setProperties({obj, keyValues}) {
+    for (let k in keyValues) {
+        obj[k] = keyValues[k];
+    }
+}
+setProperties = jsonTranslator.strIOFuncWrapper(setProperties);
+
+function callMethod({obj, name, args, kwargs}) {
+    let method = obj[name];
+    if (method === undefined) {
+        throw new Error(`Method not found: ${name}`);
+    }
+    method = method.bind(obj);
+    return method(...args, kwargs);
+}
+callMethod = jsonTranslator.strIOFuncWrapper(callMethod);
+
+function callSelf({obj, args, kwargs}) {
+    return obj(...args, kwargs);
+}
+callSelf = jsonTranslator.strIOFuncWrapper(callSelf);

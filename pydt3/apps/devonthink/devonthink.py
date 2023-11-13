@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import Optional, Union, List, TYPE_CHECKING
 
 from ...application import Application, ApplicationExtension
-from ...osascript import OSAObjArray, OSAScript
+from ...osascript import OSAScript
+from ...helper_bridging import OSAObjArray
 
 if TYPE_CHECKING:
     from .record import Record
@@ -32,84 +33,84 @@ class DEVONthink3(Application):
     # elements
     @property
     def databases(self) -> OSAObjArray[Database]:
-        return self.get_property_native('databases')
+        return self.get_property('databases')
     
     @property
     def dcoument_windows(self) -> OSAObjArray[DocumentWindow]:
-        return self.get_property_native('documentWindows')
+        return self.get_property('documentWindows')
 
     @property
     def selected_records(self) -> OSAObjArray[Record]:
-        return self.get_property_native('selectedRecords')
+        return self.get_property('selectedRecords')
     
     @property
     def think_windows(self) -> List[ThinkWindow]:
-        return self.get_property_native('thinkWindows')
+        return self.get_property('thinkWindows')
 
     @property
     def viewer_windows(self) -> List[ViewerWindow]:
-        return self.get_property_native('viewerWindows')
+        return self.get_property('viewerWindows')
 
     # properties
     @property
     def bates_number(self) -> int:
         """Current bates number."""
-        return self.get_property_native('batesNumber')
+        return self.get_property('batesNumber')
 
     @property
     def cancelled_progress(self) -> bool:
         """Specifies if a process with visible progress indicator should be cancelled."""
-        return self.get_property_native('cancelledProgress')
+        return self.get_property('cancelledProgress')
 
     @property
     def content_record(self) -> Record:
         """The record of the visible document in the frontmost think window."""
-        return self.get_property_native('contentRecord')
+        return self.get_property('contentRecord')
 
     @property
     def current_database(self) -> Database:
         """The currently used database."""
-        return self.get_property_native('currentDatabase')
+        return self.get_property('currentDatabase')
 
     @property
     def current_group(self) -> Record:
         """The (selected) group of the frontmost window of the current database. Returns root of current database if no current group exists."""
-        return self.get_property_native('currentGroup')
+        return self.get_property('currentGroup')
 
     @property
     def current_workspace(self) -> Optional[str]:
         """The name of the currently used workspace."""
-        return self.get_property_native('currentWorkspace')
+        return self.get_property('currentWorkspace')
 
     @property
     def inbox(self) -> Database:
         """The global inbox."""
-        return self.get_property_native('inbox')
+        return self.get_property('inbox')
 
     @property
     def incoming_group(self) -> Record:
         """The default group for new notes. Either global inbox or incoming group of current database if global inbox isn't available."""
-        return self.get_property_native('incomingGroup')
+        return self.get_property('incomingGroup')
 
     @property
     def last_downloaded_URL(self) -> str:
         """The actual URL of the last download."""
-        return self.get_property_native('lastDownloadedURL')
+        return self.get_property('lastDownloadedURL')
 
     @property
     def last_downloaded_response(self) -> Optional[Record]:
         """HTTP-Status, Last-Modified, Content-Type, Content-Length and Charset of last HTTP(S) response."""
-        return self.get_property_native('lastDownloadedResponse')
+        return self.get_property('lastDownloadedResponse')
 
     @property
     def preferred_import_destination(self) -> Record:
         """The default destination for data from external sources. See Preferences > Import > Destination."""
-        return self.get_property_native('preferredImportDestination')
+        return self.get_property('preferredImportDestination')
 
     @property
     def reading_list(self) -> List[dict]:
         """The items of the reading list."""
-        return self.get_property_native('readingList')
+        return self.get_property('readingList')
 
     @property
     def selection(self) -> list:
@@ -128,7 +129,7 @@ class DEVONthink3(Application):
     @property
     def workspaces(self) -> List[str]:
         """The names of all available workspaces."""
-        return self.get_property_native('workspaces')
+        return self.get_property('workspaces')
     
     # methods
     ## standard additions

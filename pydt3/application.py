@@ -1,32 +1,32 @@
 from functools import lru_cache
 
-from .osascript import OSAScript
-from .helper_bridging import OSAObjProxy, DefaultOSAObjProxy
+from .helper_bridging import OSAObjProxy, DefaultOSAObjProxy, HelperScript
 
 class Application(DefaultOSAObjProxy):
-    def __init__(self, name: str, script: OSAScript = None):
+    def __init__(self, name: str, script: HelperScript = None):
         if script is None:
-            self.script = OSAScript.default
+            self._helper_script = HelperScript.default
         else:
-            self.script = script
-        response = self.script.call_json('getApplication', {'name': name})
-        super().__init__(self.script, response['objId'], response['className'])
+            self._helper_script = script
+        response = self._helper_script.get_application(name)
+        super().__init__(self._helper_script, response.obj_id, response.class_name)
+        self._helper_script = self._helper_script.within_application(self)
         self._associsated_application = self
 
     @property
     def id(self) -> str:
         """The unique identifier of the application."""
-        return self.get_property_native('id')()
+        return self.get_property('id')()
     
     @property
     def name(self) -> str:
         """The name of the application."""
-        return self.get_property_native('name')() # The name is a function so it needs special handling
+        return self.get_property('name')() # The name is a function so it needs special handling
 
     @property
     def frontmost(self):
         """Whether the application is currently frontmost."""
-        return self.get_property_native('frontmost')()
+        return self.get_property('frontmost')()
 
     def activate(self):
         """Activate the application."""

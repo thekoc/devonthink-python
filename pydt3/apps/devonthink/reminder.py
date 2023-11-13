@@ -1,6 +1,7 @@
 import datetime
 
-from ...osascript import OSAScript, OSAObjProxy
+from ...osascript import OSAScript
+from ...helper_bridging import OSAObjProxy
 
 class Reminder(OSAObjProxy):
     def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):

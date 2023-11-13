@@ -53,7 +53,7 @@ class Text(OSAObjProxy):
     @property
     def font(self) -> str:
         """The name of the font of the first character."""
-        return self.get_property_native('font')
+        return self.get_property('font')
 
     @font.setter
     def font(self, value: str):
@@ -62,7 +62,7 @@ class Text(OSAObjProxy):
     @property
     def size(self) -> int:
         """The size in points of the first character."""
-        return self.get_property_native('size')
+        return self.get_property('size')
 
     @size.setter
     def size(self, value: int):

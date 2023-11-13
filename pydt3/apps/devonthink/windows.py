@@ -1,6 +1,7 @@
 
 from typing import List
-from ...osascript import OSAScript, OSAObjProxy
+from ...osascript import OSAScript
+from ...helper_bridging import OSAObjProxy
 from .record import Record
 from .database import Database
 
@@ -18,12 +19,12 @@ class ThinkWindow(OSAObjProxy):
     @property
     def content_record(self) -> Record:
         """The record of the visible document."""
-        return self.get_property_native('contentRecord')
+        return self.get_property('contentRecord')
 
     @property
     def current_line(self) -> int:
         """Zero-based index of current line."""
-        return self.get_property_native('currentLine')
+        return self.get_property('currentLine')
 
     @property
     def current_movie_frame(self):
@@ -33,7 +34,7 @@ class ThinkWindow(OSAObjProxy):
     @property
     def current_page(self) -> int:
         """Zero-based index of current PDF page."""
-        return self.get_property_native('currentPage')
+        return self.get_property('currentPage')
 
     @current_page.setter
     def current_page(self, value: int):
@@ -47,42 +48,42 @@ class ThinkWindow(OSAObjProxy):
     @property
     def current_time(self) -> float:
         """Time of current movie frame."""
-        return self.get_property_native('currentTime')
+        return self.get_property('currentTime')
 
     @property
     def database(self) -> Database:
         """The database of the window."""
-        return self.get_property_native('database')
+        return self.get_property('database')
 
     @property
     def loading(self) -> bool:
         """Specifies if the current web page is still loading."""
-        return self.get_property_native('loading')
+        return self.get_property('loading')
 
     @property
     def number_of_columns(self) -> int:
         """Number of columns of the current sheet."""
-        return self.get_property_native('numberOfColumns')
+        return self.get_property('numberOfColumns')
 
     @property
     def number_of_rows(self) -> int:
         """Number of rows of the current sheet."""
-        return self.get_property_native('numberOfRows')
+        return self.get_property('numberOfRows')
 
     @property
     def paginated_pdf(self) -> str:
         """A printed PDF with pagination of the visible document."""
-        return self.get_property_native('paginatedPDF')
+        return self.get_property('paginatedPDF')
 
     @property
     def pdf(self) -> str:
         """A PDF without pagination of the visible document retaining the screen layout."""
-        return self.get_property_native('pdf')
+        return self.get_property('pdf')
 
     @property
     def selected_column(self) -> int:
         """Index (1...n) of selected column of the current sheet."""
-        return self.get_property_native('selectedColumn')
+        return self.get_property('selectedColumn')
 
     @selected_column.setter
     def selected_column(self, value: int):
@@ -91,12 +92,12 @@ class ThinkWindow(OSAObjProxy):
     @property
     def selected_columns(self) -> List[int]:
         """Indices (1...n) of selected columns of the current sheet."""
-        return self.get_property_native('selectedColumns')
+        return self.get_property('selectedColumns')
 
     @property
     def selected_row(self) -> int:
         """Index (1...n) of selected row of the current sheet."""
-        return self.get_property_native('selectedRow')
+        return self.get_property('selectedRow')
 
     @selected_row.setter
     def selected_row(self, value: int):
@@ -105,12 +106,12 @@ class ThinkWindow(OSAObjProxy):
     @property
     def selected_rows(self) -> List[int]:
         """Indices (1...n) of selected rows of the current sheet."""
-        return self.get_property_native('selectedRows')
+        return self.get_property('selectedRows')
 
     @property
     def selected_text(self) -> str:
         """The text container for the selection of the window."""
-        return self.get_property_native('selectedText')
+        return self.get_property('selectedText')
     
     @selected_text.setter
     def selected_text(self, value: str):
@@ -119,17 +120,17 @@ class ThinkWindow(OSAObjProxy):
     @property
     def source(self) -> str:
         """The HTML source of the current web page."""
-        return self.get_property_native('source')
+        return self.get_property('source')
 
     @property
     def text(self) -> str:
         """The text container of the window."""
-        return self.get_property_native('text')
+        return self.get_property('text')
 
     @property
     def url(self) -> str:
         """The URL of the current web page. In addition, setting the URL can be used to load a web page."""
-        return self.get_property_native('url')
+        return self.get_property('url')
 
     @url.setter
     def url(self, value: str):
@@ -138,7 +139,7 @@ class ThinkWindow(OSAObjProxy):
     @property
     def web_archive(self) -> str:
         """Web archive of the current web page."""
-        return self.get_property_native('webArchive')
+        return self.get_property('webArchive')
 
 
 
@@ -149,7 +150,7 @@ class DocumentWindow(ThinkWindow):
     @property
     def record(self) -> Record:
         """The record of the visible document."""
-        return self.get_property_native('record')
+        return self.get_property('record')
 
 
 
@@ -167,7 +168,7 @@ class ViewerWindow(ThinkWindow):
     @property
     def root(self) -> Record:
         """The top level group of the viewer."""
-        return self.get_property_native('root')
+        return self.get_property('root')
 
     @root.setter
     def root(self, value: Record):
@@ -176,7 +177,7 @@ class ViewerWindow(ThinkWindow):
     @property
     def search_query(self) -> str:
         """The search query. Setting the query performs a search."""
-        return self.get_property_native('searchQuery')
+        return self.get_property('searchQuery')
 
     @search_query.setter
     def search_query(self, value: str):
@@ -185,7 +186,7 @@ class ViewerWindow(ThinkWindow):
     @property
     def search_results(self) -> list:
         """The search results."""
-        return self.get_property_native('searchResults')
+        return self.get_property('searchResults')
 
     @property
     def selection(self) -> list:

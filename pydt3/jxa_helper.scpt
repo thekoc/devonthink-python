@@ -1,342 +1,310 @@
-JsOsaDAS1.001.00bplist00ÑVscript_"ÿconst getObjectId = (() => {
-    let count = 0;
-    const objIdMap = new WeakMap();
-    return (object) => {
-      const objectId = objIdMap.get(object);
-      if (objectId === undefined) {
-        count += 1;
-        objIdMap.set(object, count);
-        return count;
-      }
-    
-      return objectId;
+JsOsaDAS1.001.00bplist00ÑVscript_#§class ObjectPoolManager {
+    constructor() {
+        this._currentId = 0;
+        this._objectIdMap = new Map();
+        this._idObjectMap = new Map();
     }
-})();
 
+    getObject(id) {
+        return this._idObjectMap.get(id);
+    }
 
-const objectCacheMap = {};
+    getId(obj) {
+        if (!this._objectIdMap.has(obj)) {
+            this._currentId += 1;
+            this._objectIdMap.set(obj, this._currentId);
+            this._idObjectMap.set(this._currentId, obj);
+        }
+        return this._currentId;
+    }
 
-function cacheObjct(obj) {
-    let id = getObjectId(obj);
-    objectCacheMap[id] = obj;
-    return id;
-}
-
-function getCachedObject(id) {
-    return objectCacheMap[id];
-}
-
-function jsonIOWrapper(func) {
-    return (param_str) => {
-        let param = JSON.parse(param_str);
-        let result = func(param);
-        return JSON.stringify(result);
+    releaseObjectWithId(objectId) {
+        const obj = this.getObject(objectId);
+        this._idObjectMap.delete(objectId);
+        this._objectIdMap.delete(obj);
     }
 }
 
-const getAssociatedApplication = (() => {
-    const appCache = {};
-    return function getAssociatedApplication(obj) {
-        let displayString = Automation.getDisplayString(window);
+class Util {
+    static getAssociatedApplication(obj) {
+        let displayString = Automation.getDisplayString(obj);
         let m = displayString.match(/^Application\(['"]([^)]*)['"]\)/);
         if (m) {
-            let name = m[1];
-            if (appCache[name] === undefined) {
-                appCache[name] = Application(name);
-            }
-            return appCache[name];
+            return Application(name);
         }
         return null;
     }
-})();
 
-function guessIsContainerSpecifier(specifier) {
-    if (!ObjectSpecifier.hasInstance(specifier)) {
-        return false;
+    static guessIsSpecifierContainer(specifier) {
+        // If it is an array specifier.
+        if (!ObjectSpecifier.hasInstance(specifier)) {
+            return false;
+        }
+        let proto = Object.getPrototypeOf(specifier);
+        const testPropNames = ['whose', 'at'];
+        return testPropNames.every((propName) => propName in proto);
     }
-    let proto = Object.getPrototypeOf(specifier);
-    const testPropNames = ['whose', 'at'];
-    return testPropNames.every((propName) => propName in proto);
-}
 
-function guessClassOfSpecifier(specifier) {
-    // It's at best a guess due to the nature of JXA.
-    if (!ObjectSpecifier.hasInstance(specifier)) {
-        return undefined;
-    }
-    let specifierClass = undefined;
-    if (guessIsContainerSpecifier(specifier)) {
-        specifierClass = ObjectSpecifier.classOf(specifier);
-        return 'array::' + specifierClass;
-    }
-    try {
-        specifierClass = specifier.class();
-    } catch (e) {
-        if (e.errorNumber === -1700) {
-            // The object is not a specifier.
+    static guessClassOfSpecifier(specifier) {
+        // It's at best a guess due to the nature of JXA.
+        if (!ObjectSpecifier.hasInstance(specifier)) {
             return undefined;
         }
-    }
-
-    return specifierClass;
-}
-
-function isJsonNodeValue(obj) {
-    return obj === null || ['undefined', 'string', 'number', 'boolean'].includes(typeof obj);
-}
-
-function isPlainObj(obj) {
-    if (isJsonNodeValue(obj)) {
-        return true;
-    } else if (typeof obj === 'object') {
-        for (let k in obj) {
-            if (!isJsonNodeValue(obj[k])) {
-                return false;
+        let specifierClass = undefined;
+        if (this.guessIsSpecifierContainer(specifier)) {
+            specifierClass = ObjectSpecifier.classOf(specifier);
+            return 'array::' + specifierClass;
+        }
+        try {
+            specifierClass = specifier.class();
+        } catch (e) {
+            if (e.errorNumber === -1700) {
+                // The object is not a specifier.
+                return undefined;
             }
         }
-        return true;
-    } else if (typeof obj === 'function') {
-        return false;
-    }
-}
 
-
-function wrapObjToJson(obj) {
-    if (obj === undefined) {
-        obj = null;
-    }
-    if (isJsonNodeValue(obj)) {
-        return {
-            type: 'plain',
-            data: obj
-        }
+        return specifierClass;
     }
 
-    if (typeof obj === 'object') {
-        // TODO: Handle Date
-        if (obj instanceof Date) {
-            return {
-                type: 'date',
-                data: obj.getTime() / 1000
-            }
-        }
-        if (Array.isArray(obj)) {
-            let data = []
-            for (let i in obj) {
-                data[i] = wrapObjToJson(obj[i]);
-            }
-            return {
-                type: 'array',
-                data: data
-            }
-        }
-        if (obj.constructor.name === 'Object') {
-            let data = {}
+    static isJsonNode(obj) {
+        return obj === null || ['undefined', 'string', 'number', 'boolean'].includes(typeof obj);
+    }
+
+    static isPlainJson(obj) {
+        if (this.isJsonNode(obj)) {
+            return true;
+        } else if (typeof obj === 'object') {
             for (let k in obj) {
-                data[k] = wrapObjToJson(obj[k]);
+                if (!this.isJsonNode(obj[k])) {
+                    return false;
+                }
             }
+            return true;
+        } else if (typeof obj === 'function') {
+            return false;
+        }
+    }
+
+    static isMethod(obj) {
+        return typeof obj === 'function' && obj.constructor.name === 'Function';
+    }
+}
+
+class JsonTranslator {
+    /**
+     * @param {ObjectPoolManager} objectPoolManager 
+     */
+    constructor(objectPoolManager) {
+        this.objectPoolManager = objectPoolManager;
+    }
+
+    wrapToJson(obj) {
+        if (obj === undefined) {
+            obj = null;
+        }
+
+        if (Util.isJsonNode(obj)) {
             return {
-                type: 'dict',
-                data: data
+                type: 'plain',
+                data: obj
             }
         }
 
-        throw new Error(`wrapObjToJson: Unknown type: ${typeof obj}`);
-    }
+        if (typeof obj === 'object') {
+            // TODO: Handle Date
+            if (obj instanceof Date) {
+                return {
+                    type: 'date',
+                    data: obj.getTime() / 1000
+                }
+            }
+            if (Array.isArray(obj)) {
+                let data = []
+                for (let i in obj) {
+                    data[i] = this.wrapToJson(obj[i]);
+                }
+                return {
+                    type: 'array',
+                    data: data
+                }
+            }
+            if (obj.constructor.name === 'Object') {
+                let data = {}
+                for (let k in obj) {
+                    data[k] = this.wrapToJson(obj[k]);
+                }
+                return {
+                    type: 'dict',
+                    data: data
+                }
+            }
 
-    if (ObjectSpecifier.hasInstance(obj)) {
-        let guessClass = guessClassOfSpecifier(obj);
-        if (guessClass === undefined) {
-            // The object is a specifier but we don't know its class.
-            // This could mean that the object is a reference to a primitive value.
-            // eg. a `number`, `bool` or `string`.
-            // In that case, the best we can do is to return the evaluated value.
+            throw new Error(`wrapObjToJson: Unknown type: ${typeof obj}`);
+        }
+
+        if (ObjectSpecifier.hasInstance(obj)) {
+            let guessClass = Util.guessClassOfSpecifier(obj);
+            if (guessClass === undefined) {
+                // The object is a specifier but we don't know its class.
+                // This could mean that the object is a reference to a primitive value.
+                // eg. a `number`, `bool` or `string`.
+                // In that case, the best we can do is to return the evaluated value.
+                let evaluated = obj();
+                return this.wrapToJson(evaluated);
+            }
+
+            if (guessClass === 'application') {
+                return {
+                    type: 'reference',
+                    objId: this.objectPoolManager.getId(obj),
+                    plainRepr: null,
+                    className: 'application'
+                }
+            }
+
+            if (guessClass.startsWith('array::')) {
+                return {
+                    type: 'reference',
+                    objId: this.objectPoolManager.getId(obj),
+                    plainRepr: null,
+                    className: guessClass
+                }
+            }
+
+            // If the evaluated object is a plain object, return the evaluated value.
+            // WARNING: This may cause problems if the object is a reference to a text or dict.
+            //          In that case, the object "can" be interpreted as a plain object but still
+            //          has properties that are references to other objects.
             let evaluated = obj();
-            return wrapObjToJson(evaluated);
-        }
+            if (!Util.isPlainJson(evaluated)) {
+                evaluated = null;
+            }
 
-        if (guessClass === 'application') {
             return {
                 type: 'reference',
-                objId: cacheObjct(obj),
-                plainRepr: null,
-                className: 'application'
+                objId: this.objectPoolManager.getId(obj),
+                className: guessClass,
+                plainRepr: evaluated
             }
         }
 
-        if (guessClass.startsWith('array::')) {
+        if (typeof obj === 'function') {
             return {
                 type: 'reference',
-                objId: cacheObjct(obj),
-                plainRepr: null,
-                className: guessClass
+                objId: this.objectPoolManager.getId(obj),
+                className: 'function'
             }
         }
 
-        // If the evaluated object is a plain object, return the evaluated value.
-        // WARNING: This may cause problems if the object is a reference to a text or dict.
-        //          In that case, the object "can" be interpreted as a plain object but still
-        //          has properties that are references to other objects.
-        let evaluated = obj();
-        if (!isPlainObj(evaluated)) {
-            evaluated = null;
-        }
+        throw new Error(`Unknown type: ${typeof obj}`);
+    }
 
-        return {
-            type: 'reference',
-            objId: cacheObjct(obj),
-            className: guessClass,
-            plainRepr: evaluated
+    unwrapFromJson(obj) {
+        if (obj.type === 'plain') {
+            return obj.data;
+        } else if (obj.type === 'date') {
+            return new Date(obj.data * 1000);
+        } else if (obj.type === 'array' || obj.type === 'dict') {
+            for (let k in obj.data) {
+                obj.data[k] = this.unwrapFromJson(obj.data[k]);
+            }
+            return obj.data;
+        } else if (obj.type === 'reference') {
+            return this.objectPoolManager.getObject(obj.objId);
         }
     }
 
-    if (typeof obj === 'function') {
-        return {
-            type: 'reference',
-            objId: cacheObjct(obj),
-            className: 'function'
+    strIOFuncWrapper(func) {
+        return  (strParams) => {
+            let params = JSON.parse(strParams);
+            params = this.unwrapFromJson(params);
+            let result = func(params);
+            result = this.wrapToJson(result);
+            return JSON.stringify(result);
         }
-    }
-
-    throw new Error(`Unknown type: ${typeof obj}`);
-}
-
-function unwrapObjFromJson(obj) {
-    if (obj.type === 'plain') {
-        return obj.data;
-    } else if (obj.type === 'date') {
-        return new Date(obj.data * 1000);
-    } else if (obj.type === 'array' || obj.type === 'dict') {
-        for (let k in obj.data) {
-            obj.data[k] = unwrapObjFromJson(obj.data[k]);
-        }
-        return obj.data;
-    } else if (obj.type === 'reference') {
-        return getCachedObject(obj.objId);
     }
 }
 
-function getApplication(params) {
-    let name = params.name;
+
+
+const objectPoolManager = new ObjectPoolManager();
+const jsonTranslator = new JsonTranslator(objectPoolManager);
+
+
+// const echo = jsonTranslator.strIOFuncWrapper((params) => {
+//     return params;
+// });
+
+function echo(params) {
+    return params;
+}
+echo = jsonTranslator.strIOFuncWrapper(echo);
+
+
+
+function releaseObjectWithId({id}) {
+    objectPoolManager.releaseObjectWithId(id);
+}
+releaseObjectWithId = jsonTranslator.strIOFuncWrapper(releaseObjectWithId);
+
+function getApplication({name}) {
     let app = Application(name);
     app.includeStandardAdditions = true
-    return wrapObjToJson(app);
+    return app;
 }
-getApplication = jsonIOWrapper(getApplication);
+getApplication = jsonTranslator.strIOFuncWrapper(getApplication);
 
-function isMethod(obj) {
-    return typeof obj === 'function' && obj.constructor.name === 'Function';
-}
-
-function getProperties(params) {
-    let objId = params.objId;
-    let names = params.names;
-    let obj = objectCacheMap[objId];
-    let data = {};
-    for (let n of names) {
-        let property = obj[n];
-        if (isMethod(property)) {
-            property = property.bind(obj);
-        }
-        data[n] = wrapObjToJson(property);
-    }
-    return data;
-}
-getProperties = jsonIOWrapper(getProperties);
-
-
-function setPropertyValues(params) {
-    let objId = params.objId;
-    let properties = params.properties;
-
-    let obj = objectCacheMap[objId];
-
-    for (let n in properties) {
-        let value = properties[n];
-        obj[n] = value;
-    }
-    return {};
-}
-setPropertyValues = jsonIOWrapper(setPropertyValues);
-
-function callMethod(params) {
-    let objId = params.objId;
-    let name = params.name;
-    let args = params.args;
-    let kwargs = params.kwargs;
-
-    let obj = getCachedObject(objId);
-    let func;
-
-    if (name === null) {
-        func = obj
-    } else {
-        func = obj[name].bind(obj);
-    }
-
-    if (args === null) {
-        args = [];
-    }
-
-    for (let i = 0; i < args.length; i++) {
-        args[i] = unwrapObjFromJson(args[i]);
-    }
-    if (kwargs !== null) {
-        for (let k in params.kwargs) {
-            kwargs[k] = unwrapObjFromJson(params.kwargs[k]);
-        }
-    }
-
-    let result = func(...args, kwargs);
-    return wrapObjToJson(result);
-}
-callMethod = jsonIOWrapper(callMethod);
-
-
-function releaseObject(params) {
-    let objId = params.objId;
-    delete objectCacheMap[objId];
-    return {};
-}
-releaseObject = jsonIOWrapper(releaseObject);
-
-function evalJXACodeSnippet(params) {
-    params = unwrapObjFromJson(params);
-    let source = params.source;
-    let locals = params.locals;
+function evalJXACodeSnippet({source, locals}) {
     for (let k in locals) {
         eval(`var ${k} = locals[k];`);
     }
-    return wrapObjToJson(eval(source));
+    const value = eval(source);
+    return {
+        'string': `${value}`
+    }
 }
-evalJXACodeSnippet = jsonIOWrapper(evalJXACodeSnippet);
+evalJXACodeSnippet = jsonTranslator.strIOFuncWrapper(evalJXACodeSnippet);
 
-
-function evalAppleScriptCodeSnippet(params) {
-    params = unwrapObjFromJson(params);
-    let source = params.source;
+function evalAppleScriptCodeSnippet({source}) {
     let app = Application.currentApplication();
     app.includeStandardAdditions = true;
 
     let result = app.runScript(source, {in: 'AppleScript'});
-    return wrapObjToJson(result);
+    return result;
 }
-evalAppleScriptCodeSnippet = jsonIOWrapper(evalAppleScriptCodeSnippet);
+evalAppleScriptCodeSnippet = jsonTranslator.strIOFuncWrapper(evalAppleScriptCodeSnippet);
 
-
-function callSelf(params) {
-    let objId = params.objId;
-    let args = params.args;
-    
-    for (let i = 0; i < args.length; i++) {
-        args[i] = unwrapObjFromJson(args[i]);
+function getProperties({obj, properties}) {
+    let result = {};
+    for (let k of properties) {
+        result[k] = obj[k];
+        if (Util.isMethod(result[k])) {
+            result[k] = result[k].bind(obj);
+        }
     }
-    let kwargs = {};
-    for (let k in params.kwargs) {
-        kwargs[k] = unwrapObjFromJson(params.kwargs[k]);
-    }
-    let obj = objectCacheMap[objId];
-    let result = obj(...args, kwargs);
-    return wrapObjToJson(result);
+    return result;
 }
-callSelf = jsonIOWrapper(callSelf);                              # jscr  úÞÞ­
+getProperties = jsonTranslator.strIOFuncWrapper(getProperties);
+
+function setProperties({obj, keyValues}) {
+    for (let k in keyValues) {
+        obj[k] = keyValues[k];
+    }
+}
+setProperties = jsonTranslator.strIOFuncWrapper(setProperties);
+
+function callMethod({obj, name, args, kwargs}) {
+    let method = obj[name];
+    if (method === undefined) {
+        throw new Error(`Method not found: ${name}`);
+    }
+    method = method.bind(obj);
+    return method(...args, kwargs);
+}
+callMethod = jsonTranslator.strIOFuncWrapper(callMethod);
+
+function callSelf({obj, args, kwargs}) {
+    return obj(...args, kwargs);
+}
+callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              #½ jscr  úÞÞ­

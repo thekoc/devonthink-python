@@ -3,7 +3,8 @@ import typing
 import logging
 import re
 from pydt3 import DEVONthink3
-from pydt3.osascript import OSAScript, OSAObjProxy, OSAObjArray
+from pydt3.osascript import OSAScript
+from pydt3.helper_bridging import OSAObjProxy, DefaultOSAObjProxy
 from pydt3.apps.devonthink.record import Record
 from pydt3.apps.devonthink.smartgroup import SmartGroup
 

@@ -10,11 +10,8 @@ logger = getLogger(__name__)
 
 
 
-DEFAULT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), 'jxa_helper.scpt')
 
 class OSAScript:
-    default: 'OSAScript'
-
     def __init__(self, script: NSAppleScript):
         self.script = script
 
@@ -41,18 +38,10 @@ class OSAScript:
             raise RuntimeError(error)
         else:
             return result.stringValue()
-    
-    def call_json_io(self, func_name: str, params: dict):
-        param_str = json.dumps(params)
-        logger.debug(f'call_json_io func_name {func_name} params: {param_str}')
-        result = self._call(func_name, param_str)
-        logger.debug(f'call_json_io result: {result}')
-        return json.loads(result)
 
     def fourcharcode(self, chars: bytes):
         return int.from_bytes(chars, 'big')
 
-OSAScript.default = OSAScript.from_path(DEFAULT_SCRIPT_PATH)
 
 if __name__ == '__main__':
     script = OSAScript.from_path('/Users/koc/Developer/devonthink/python-api/pydt3/test.scpt')

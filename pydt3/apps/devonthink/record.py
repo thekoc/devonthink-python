@@ -4,7 +4,8 @@ import datetime
 from typing import Optional, Any, TYPE_CHECKING
 
 from .devonthink import DEVONthink3
-from ...osascript import OSAScript, OSAObjProxy, OSAObjArray
+from ...osascript import OSAScript
+from ...helper_bridging import OSAObjProxy, OSAObjArray
 
 
 if TYPE_CHECKING:
@@ -18,7 +19,7 @@ class CustomMetaData:
 
     def __init__(self, owner: 'Record', property_name: str):
         self.owner = owner
-        self.meta_dict = owner.get_property_native(property_name)
+        self.meta_dict = owner.get_property(property_name)
         self.property_name = property_name
 
     def get_dict_value(self):
@@ -34,14 +35,14 @@ class CustomMetaData:
         return self.get_dict_value()
     
     def __getitem__(self, key: str) -> Any:
-        if isinstance(self.owner.binded_application, DEVONthink3):
-            return self.owner.binded_application.get_custom_meta_data(key, self.owner)
+        if isinstance(self.owner.associated_application, DEVONthink3):
+            return self.owner.associated_application.get_custom_meta_data(key, self.owner)
         else:
             return self.get_dict_value().get(key)
 
     def __setitem__(self, key: str, value: Any):
-        if isinstance(self.owner.binded_application, DEVONthink3):
-            return self.owner.binded_application.add_custom_meta_data(value, key, self.owner)
+        if isinstance(self.owner.associated_application, DEVONthink3):
+            return self.owner.associated_application.add_custom_meta_data(value, key, self.owner)
         else:
             return self.get_dict_value().get(key)
             prev_dict = self.get_dict_value()
@@ -59,48 +60,48 @@ class Record(OSAObjProxy):
     @property
     def children(self) -> OSAObjArray['Record']:
         """List of child records."""
-        return self.get_property_native('children')
+        return self.get_property('children')
 
     @property
     def incoming_references(self) -> OSAObjArray['Record']:
         """List of records referencing this record."""
-        return self.get_property_native('incomingReferences')
+        return self.get_property('incomingReferences')
 
     @property
     def incoming_wiki_references(self) -> OSAObjArray['Record']:
         """List of wiki records referencing this record."""
-        return [proxy.as_class(Record) for proxy in self.get_property_native('incomingWikiReferences')]
+        return self.get_property('incomingWikiReferences')
 
     @property
     def outgoing_references(self) -> OSAObjArray['Record']:
         """List of records this record references."""
-        return [proxy.as_class(Record) for proxy in self.get_property_native('outgoingReferences')]
+        return self.get_property('outgoingReferences')
 
     @property
     def outgoing_wiki_references(self) -> OSAObjArray['Record']:
         """List of wiki records this record references."""
-        return [proxy.as_class(Record) for proxy in self.get_property_native('outgoingWikiReferences')]
+        return self.get_property('outgoingWikiReferences')
 
     @property
     def parents(self) -> OSAObjArray['Record']:
         """List of parent records."""
-        return self.get_property_native('parents')
+        return self.get_property('parents')
 
     @property
     def texts(self):
         """List of texts of the record. (Not implemented. It is broken in JXA.)"""
-        raise NotImplementedError()  
+        raise NotImplementedError('Not implemented. It is broken in JXA.')  
 
     # properties
     @property
     def addition_date(self) -> datetime.datetime:
         """Date when the record was added to the database."""
-        return self.get_property_native('additionDate')
+        return self.get_property('additionDate')
 
     @property
     def aliases(self) -> str:
         """Wiki aliases (separated by commas or semicolons) of a record."""
-        return self.get_property_native('aliases')
+        return self.get_property('aliases')
 
     @aliases.setter
     def aliases(self, value: str):
@@ -109,12 +110,12 @@ class Record(OSAObjProxy):
     @property
     def all_document_dates(self) -> Optional[OSAObjArray[datetime.datetime]]:
         """All dates extracted from text of document, e.g. a scan."""
-        return self.get_property_native('allDocumentDates')
+        return self.get_property('allDocumentDates')
 
     @property
     def altitude(self) -> float:
         """The altitude in metres of a record."""
-        return self.get_property_native('altitude')
+        return self.get_property('altitude')
 
     @altitude.setter
     def altitude(self, value: float):
@@ -123,7 +124,7 @@ class Record(OSAObjProxy):
     @property
     def annotation(self) -> Optional['Record']:
         """Annotation of a record. Only plain & rich text and Markdown documents are supported."""
-        return self.get_property_native('annotation')
+        return self.get_property('annotation')
 
     @annotation.setter
     def annotation(self, value: 'Record'):
@@ -132,12 +133,12 @@ class Record(OSAObjProxy):
     @property
     def annotation_count(self) -> int:
         """The number of annotations. Currently only supported for PDF documents."""
-        return self.get_property_native('annotationCount')
+        return self.get_property('annotationCount')
 
     @property
     def attached_script(self) -> str:
         """POSIX path of script attached to a record."""
-        return self.get_property_native('attachedScript')
+        return self.get_property('attachedScript')
 
     @attached_script.setter
     def attached_script(self, value: str):
@@ -146,12 +147,12 @@ class Record(OSAObjProxy):
     @property
     def attachment_count(self) -> int:
         """The number of attachments. Currently only supported for RTFD documents and emails."""
-        return self.get_property_native('attachmentCount')
+        return self.get_property('attachmentCount')
 
     @property
     def bates_number(self) -> int:
         """Bates number."""
-        return self.get_property_native('batesNumber')
+        return self.get_property('batesNumber')
 
     @bates_number.setter
     def bates_number(self, value: int):
@@ -160,17 +161,17 @@ class Record(OSAObjProxy):
     @property
     def cells(self) -> Optional[OSAObjArray[OSAObjArray[str]]]:
         """The cells of a sheet. This is a list of rows, each row contains a list of string values for the various colums."""
-        return self.get_property_native('cells')
+        return self.get_property('cells')
 
     @property
     def character_count(self) -> int:
         """The character count of a record."""
-        return self.get_property_native('characterCount')
+        return self.get_property('characterCount')
 
     @property
     def color(self) -> Optional[OSAObjArray[float]]:
         """The color of a record. Currently only supported by tags."""
-        return self.get_property_native('color')
+        return self.get_property('color')
 
     @color.setter
     def color(self, value: OSAObjArray[float]):
@@ -180,12 +181,12 @@ class Record(OSAObjProxy):
     @property
     def columns(self) -> Optional[OSAObjArray[str]]:
         """The column names of a sheet.""" 
-        return self.get_property_native('columns')
+        return self.get_property('columns')
 
     @property
     def comment(self) -> str:
         """The comment of a record."""
-        return self.get_property_native('comment')
+        return self.get_property('comment')
 
     @comment.setter
     def comment(self, value: str):
@@ -194,12 +195,12 @@ class Record(OSAObjProxy):
     @property
     def content_hash(self) -> Optional[str]:
         """Stored SHA1 hash of files and document packages."""
-        return self.get_property_native('contentHash')
+        return self.get_property('contentHash')
 
     @property
     def creation_date(self) -> datetime.datetime:
         """The creation date of a record."""
-        return self.get_property_native('creationDate')
+        return self.get_property('creationDate')
 
     @property
     def custom_meta_data(self) -> Optional[CustomMetaData]:
@@ -209,74 +210,73 @@ class Record(OSAObjProxy):
     @property
     def data(self) -> str:
         """The file data of a record. Currently only supported by PDF documents, images, rich texts and web archives."""
-        return self.get_property_native('data')
+        return self.get_property('data')
 
     @property
     def database(self) -> 'Database':
         """The database of the record."""
-        return self.get_property_native('database')
+        return self.get_property('database')
 
     @property
     def date(self) -> datetime.datetime:
         """The (creation/modification) date of a record."""
-        return self.get_property_native('date')
+        return self.get_property('date')
 
     @property
     def digital_object_identifier(self) -> Optional[str]:
         """Digital object identifier (DOI) extracted from text of document, e.g. a scanned receipt."""
-        return self.get_property_native('digitalObjectIdentifier')
+        return self.get_property('digitalObjectIdentifier')
 
     @property
     def dimensions(self) -> OSAObjArray[int]:
         """The width and height of an image or PDF document in pixels."""
-        return self.get_property_native('dimensions')
+        return self.get_property('dimensions')
 
     @property
     def document_amount(self) -> Optional[str]:
         """Amount extracted from text of document, e.g. a scanned receipt."""
-        return self.get_property_native('documentAmount')
+        return self.get_property('documentAmount')
 
     @property
     def document_date(self) -> Optional[datetime.datetime]:
         """First date extracted from text of document, e.g. a scan."""
-        return self.get_property_native('documentDate')
+        return self.get_property('documentDate')
 
     @property
     def document_name(self) -> str:
         """Name based on text or properties of document"""
-        return self.get_property_native('documentName')
+        return self.get_property('documentName')
 
     @property
     def dpi(self) -> int:
         """The resultion of an image in dpi."""
-        return self.get_property_native('dpi')
+        return self.get_property('dpi')
 
     @property
     def duplicates(self) -> OSAObjArray['Record']:
         """The duplicates of a record (only other instances, not including the record)."""
-        # WARN: In applescript the class is not rightly defined, so this is a workaround
-        result = self.get_property_native('duplicates')
-        return [i.as_class(Record) for i in result]
+        result = self.get_property('duplicates')
+        return result
 
     @property
     def duration(self) -> float:
         """The duration of audio and video files."""
-        return self.get_property_native('duration')
+        return self.get_property('duration')
 
     @property
     def encrypted(self) -> bool:
         """Specifies if a document is encrypted or not. Currently only supported by PDF documents."""
-        return self.get_property_native('encrypted')
+        return self.get_property('encrypted')
 
     @property
     def filename(self) -> str:
         """The current filename of a record."""
-        return self.get_property_native('filename')
+        return self.get_property('filename')
 
     @property
     def exclude_from_classification(self) -> bool:
         """Exclude group or record from classifying."""
-        return self.get_property_native('excludeFromClassification')
+        return self.get_property('excludeFromClassification')
 
     @exclude_from_classification.setter
     def exclude_from_classification(self, value: bool):
@@ -285,7 +285,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_search(self) -> bool:
         """Exclude group or record from searching."""
-        return self.get_property_native('excludeFromSearch')
+        return self.get_property('excludeFromSearch')
 
     @exclude_from_search.setter
     def exclude_from_search(self, value: bool):
@@ -294,7 +294,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_see_also(self) -> bool:
         """Exclude record from see also."""
-        return self.get_property_native('excludeFromSeeAlso')
+        return self.get_property('excludeFromSeeAlso')
 
     @exclude_from_see_also.setter
     def exclude_from_see_also(self, value: bool):
@@ -303,7 +303,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_tagging(self) -> bool:
         """Exclude group from tagging."""
-        return self.get_property_native('excludeFromTagging')
+        return self.get_property('excludeFromTagging')
 
     @exclude_from_tagging.setter
     def exclude_from_tagging(self, value: bool):
@@ -312,7 +312,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_wiki_linking(self) -> bool:
         """Exclude record from automatic Wiki linking."""
-        return self.get_property_native('excludeFromWikiLinking')
+        return self.get_property('excludeFromWikiLinking')
 
     @exclude_from_wiki_linking.setter
     def exclude_from_wiki_linking(self, value: bool):
@@ -321,28 +321,28 @@ class Record(OSAObjProxy):
     @property
     def filename(self) -> str:
         """The current filename of a record."""
-        return self.get_property_native('filename')
+        return self.get_property('filename')
 
     @property
     def geolocation(self) -> Optional[str]:
         """The human readable geogr. place of a record."""
-        return self.get_property_native('geolocation')
+        return self.get_property('geolocation')
 
     @property
     def height(self) -> int:
         """The height of an image or PDF document in pixels."""
-        return self.get_property_native('height')
+        return self.get_property('height')
 
     @property
     def id(self) -> int:
         """The scripting identifier of a record. Optimizing or closing a database might modify this identifier."""
-        return self.get_property_native('id')
+        return self.get_property('id')
 
     # properties
     @property
     def image(self):
         """The image or PDF document of a record. Setting supports both raw data and strings containing paths or URLs."""
-        return self.get_property_native('image')
+        return self.get_property('image')
 
     @image.setter
     def image(self, value):
@@ -351,12 +351,12 @@ class Record(OSAObjProxy):
     @property
     def indexed(self) -> bool:
         """Indexed or imported record."""
-        return self.get_property_native('indexed')
+        return self.get_property('indexed')
 
     @property
     def interval(self) -> float:
         """Refresh interval of a feed. Currently overriden by preferences."""
-        return self.get_property_native('interval')
+        return self.get_property('interval')
 
     @interval.setter
     def interval(self, value: float):
@@ -365,12 +365,12 @@ class Record(OSAObjProxy):
     @property
     def kind(self) -> Optional[str]:
         """The human readable and localized kind of a record. WARNING: Don't use this to check the type of a record, otherwise your script might fail depending on the version and the localization."""
-        return self.get_property_native('kind')
+        return self.get_property('kind')
 
     @property
     def label(self) -> int:
         """Index of label (0-7) of a record."""
-        return self.get_property_native('label')
+        return self.get_property('label')
 
     @label.setter
     def label(self, value: int):
@@ -378,7 +378,7 @@ class Record(OSAObjProxy):
     @property
     def latitude(self) -> float:
         """The latitude in degrees of a record."""
-        return self.get_property_native('latitude')
+        return self.get_property('latitude')
 
     @latitude.setter
     def latitude(self, value: float):
@@ -388,17 +388,17 @@ class Record(OSAObjProxy):
     def location(self) -> str:
         """The primary location in the database as a POSIX path (/ in names is replaced with \/). 
         This is the location of the first parent group."""
-        return self.get_property_native('location')
+        return self.get_property('location')
 
     @property
     def location_group(self) -> 'Record':
         """The group of the record's primary location. This is identical to the first parent group."""
-        return self.get_property_native('locationGroup')
+        return self.get_property('locationGroup')
 
     @property
     def locking(self) -> bool:
         """The locking of a record."""
-        return self.get_property_native('locking')
+        return self.get_property('locking')
 
     @locking.setter
     def locking(self, value: bool):
@@ -407,7 +407,7 @@ class Record(OSAObjProxy):
     @property
     def longitude(self) -> float:
         """The longitude in degrees of a record."""
-        return self.get_property_native('longitude')
+        return self.get_property('longitude')
 
     @longitude.setter
     def longitude(self, value: float):
@@ -418,17 +418,17 @@ class Record(OSAObjProxy):
         """Document metadata (e.g. of PDF or RTF) of a record as a dictionary containing key-value pairs. 
         Possible keys are currently kMDItemTitle, kMDItemHeadline, kMDItemSubject, kMDItemDescription, 
         kMDItemCopyright, kMDItemComment, kMDItemURL, kMDItemKeywords, kM"""
-        return self.get_property_native('metaData')
+        return self.get_property('metaData')
 
     @property
     def mime_type(self) -> Optional[str]:
         """The (proposed) MIME type of a record."""
-        return self.get_property_native('mimeType')
+        return self.get_property('mimeType')
 
     @property
     def modification_date(self) -> datetime.datetime:
         """The modification date of a record."""
-        return self.get_property_native('modificationDate')
+        return self.get_property('modificationDate')
 
     @modification_date.setter
     def modification_date(self, value: datetime.datetime):
@@ -438,7 +438,7 @@ class Record(OSAObjProxy):
     @property
     def name(self) -> str:
         """The name of a record."""
-        return self.get_property_native('name')
+        return self.get_property('name')
 
     @name.setter
     def name(self, value: str):
@@ -447,27 +447,27 @@ class Record(OSAObjProxy):
     @property
     def name_without_date(self) -> str:
         """The name of a record without any dates."""
-        return self.get_property_native('nameWithoutDate')
+        return self.get_property('nameWithoutDate')
 
     @property
     def name_without_extension(self) -> str:
         """The name of a record without a file extension (independent of preferences)."""
-        return self.get_property_native('nameWithoutExtension')
+        return self.get_property('nameWithoutExtension')
 
     @property
     def newest_document_date(self) -> Optional[datetime.datetime]:
         """Newest date extracted from text of document, e.g. a scan."""
-        return self.get_property_native('newestDocumentDate')
+        return self.get_property('newestDocumentDate')
 
     @property
     def number_of_duplicates(self) -> int:
         """The number of duplicates of a record."""
-        return self.get_property_native('numberOfDuplicates')
+        return self.get_property('numberOfDuplicates')
 
     @property
     def number_of_hits(self) -> int:
         """The number of hits of a record."""
-        return self.get_property_native('numberOfHits')
+        return self.get_property('numberOfHits')
 
     @number_of_hits.setter
     def number_of_hits(self, value: int):
@@ -476,32 +476,32 @@ class Record(OSAObjProxy):
     @property
     def number_of_replicants(self) -> int:
         """The number of replicants of a record."""
-        return self.get_property_native('numberOfReplicants')
+        return self.get_property('numberOfReplicants')
 
     @property
     def oldest_document_date(self) -> Optional[datetime.datetime]:
         """Oldest date extracted from text of document, e.g. a scan."""
-        return self.get_property_native('oldestDocumentDate')
+        return self.get_property('oldestDocumentDate')
 
     @property
     def opening_date(self) -> Optional[datetime.datetime]:
         """Date when a content was opened the last time or when a feed was refreshed the last time."""
-        return self.get_property_native('openingDate')
+        return self.get_property('openingDate')
 
     @property
     def page_count(self) -> int:
         """The page count of a record. Currently only supported by PDF documents."""
-        return self.get_property_native('pageCount')
+        return self.get_property('pageCount')
 
     @property
     def paginated_pdf(self):
         """A printed/converted PDF of the record."""
-        return self.get_property_native('paginatedPDF')
+        return self.get_property('paginatedPDF')
 
     @property
     def path(self) -> str:
         """The POSIX file path of a record. Only the path of external records can be changed."""
-        return self.get_property_native('path')
+        return self.get_property('path')
     
     @path.setter
     def path(self, value: str):
@@ -510,12 +510,12 @@ class Record(OSAObjProxy):
     @property
     def pending(self) -> bool:
         """Flag whether the (latest) contents of a record haven't been downloaded from a sync location yet."""
-        return self.get_property_native('pending')
+        return self.get_property('pending')
 
     @property
     def plain_text(self) -> str:
         """The plain text of a record."""
-        return self.get_property_native('plainText')
+        return self.get_property('plainText')
     
     @plain_text.setter
     def plain_text(self, value: str):
@@ -524,12 +524,12 @@ class Record(OSAObjProxy):
     @property
     def proposed_filename(self) -> str:
         """The proposed filename for a record."""
-        return self.get_property_native('proposedFilename')
+        return self.get_property('proposedFilename')
 
     @property
     def rating(self) -> int:
         """Rating (0-5) of a record."""
-        return self.get_property_native('rating')
+        return self.get_property('rating')
 
     @rating.setter
     def rating(self, value: int):
@@ -541,12 +541,12 @@ class Record(OSAObjProxy):
         Append ?page= to specify the zero-based index of a page of a PDF document,
         ?time= to specify the time of a movie or ?search= to specify a string to search.
         """
-        return self.get_property_native('referenceURL')
+        return self.get_property('referenceURL')
 
     @property
     def reminder(self) -> Optional['Reminder']:
         """Reminder of a record."""
-        return self.get_property_native('reminder')
+        return self.get_property('reminder')
 
     @reminder.setter
     def reminder(self, value: 'Reminder'):
@@ -557,27 +557,27 @@ class Record(OSAObjProxy):
         """The rich text of a record (see text suite). 
         Use the 'text' relationship introduced by version 3.0 instead,
         especially for changing the contents/styles of RTF(D) documents."""
-        return self.get_property_native('richText')
+        return self.get_property('richText')
 
     @property
     def score(self) -> float:
         """The score of the last comparison, classification or search (value between 0.0 and 1.0) or undefined otherwise."""
-        return self.get_property_native('score')
+        return self.get_property('score')
 
     @property
     def size(self) -> int:
         """The size of a record in bytes."""
-        return self.get_property_native('size')
+        return self.get_property('size')
 
     @property
     def source(self) -> str:
         """The HTML/XML source of a record if available or the record converted to HTML if possible."""
-        return self.get_property_native('source')
+        return self.get_property('source')
 
     @property
     def state(self) -> bool:
         """The state/flag of a record."""
-        return self.get_property_native('state')
+        return self.get_property('state')
 
     @state.setter
     def state(self, value: bool):
@@ -591,12 +591,12 @@ class Record(OSAObjProxy):
     @property
     def tag_type(self) -> str:
         """The tag type of a record."""
-        return self.get_property_native('tagType')
+        return self.get_property('tagType')
 
     @property
     def tags(self) -> OSAObjArray[str]:
         """The tags of a record."""
-        return self.get_property_native('tags')
+        return self.get_property('tags')
 
     @tags.setter
     def tags(self, value: list):
@@ -605,7 +605,7 @@ class Record(OSAObjProxy):
     @property
     def thumbnail(self) -> Optional[str]:
         """The thumbnail of a record. Setting supports both raw data and strings containing paths or URLs."""
-        return self.get_property_native('thumbnail')
+        return self.get_property('thumbnail')
 
     @thumbnail.setter
     def thumbnail(self, value: any):
@@ -617,12 +617,12 @@ class Record(OSAObjProxy):
         The type of a record. ("bookmark"/‌"feed"/‌"formatted note"/‌"group"/‌"html"/‌"markdown"/‌"PDF document"/‌"picture"/‌"plist"/‌"quicktime"/‌"rtf"/‌"rtfd"/‌"script"/‌"sheet"/‌"smart group"/‌"txt"/‌"unknown"/‌"webarchive"/‌"xml")
         Note: In compiled menu/toolbar scripts you might have to use a string representation of the type for comparisons.
         """
-        return self.get_property_native('type')
+        return self.get_property('type')
 
     @property
     def unread(self) -> bool:
         """The unread flag of a record."""
-        return self.get_property_native('unread')
+        return self.get_property('unread')
 
     @unread.setter
     def unread(self, value: bool):
@@ -631,27 +631,27 @@ class Record(OSAObjProxy):
     @property
     def url(self) -> str:
         """The URL of a record."""
-        return self.get_property_native('url')
+        return self.get_property('url')
 
     @property
     def uuid(self) -> str:
         """The unique and persistent identifier of a record."""
-        return self.get_property_native('uuid')
+        return self.get_property('uuid')
 
     @property
     def web_archive(self):
         """The web archive of a record if available or the record converted to web archive if possible."""
-        return self.get_property_native('webArchive')
+        return self.get_property('webArchive')
 
     @property
     def width(self) -> int:
         """The width of an image or PDF document in pixels."""
-        return self.get_property_native('width')
+        return self.get_property('width')
 
     @property
     def word_count(self) -> int:
         """The word count of a record."""
-        return self.get_property_native('wordCount')
+        return self.get_property('wordCount')
     
     def __repr__(self):
         return f'<Record: {self.name}>'
