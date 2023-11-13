@@ -33,84 +33,84 @@ class DEVONthink3(Application):
     # elements
     @property
     def databases(self) -> OSAObjArray[Database]:
-        return self.get_property('databases')
+        return self._get_property('databases')
     
     @property
     def dcoument_windows(self) -> OSAObjArray[DocumentWindow]:
-        return self.get_property('documentWindows')
+        return self._get_property('documentWindows')
 
     @property
     def selected_records(self) -> OSAObjArray[Record]:
-        return self.get_property('selectedRecords')
+        return self._get_property('selectedRecords')
     
     @property
     def think_windows(self) -> List[ThinkWindow]:
-        return self.get_property('thinkWindows')
+        return self._get_property('thinkWindows')
 
     @property
     def viewer_windows(self) -> List[ViewerWindow]:
-        return self.get_property('viewerWindows')
+        return self._get_property('viewerWindows')
 
     # properties
     @property
     def bates_number(self) -> int:
         """Current bates number."""
-        return self.get_property('batesNumber')
+        return self._get_property('batesNumber')
 
     @property
     def cancelled_progress(self) -> bool:
         """Specifies if a process with visible progress indicator should be cancelled."""
-        return self.get_property('cancelledProgress')
+        return self._get_property('cancelledProgress')
 
     @property
     def content_record(self) -> Record:
         """The record of the visible document in the frontmost think window."""
-        return self.get_property('contentRecord')
+        return self._get_property('contentRecord')
 
     @property
     def current_database(self) -> Database:
         """The currently used database."""
-        return self.get_property('currentDatabase')
+        return self._get_property('currentDatabase')
 
     @property
     def current_group(self) -> Record:
         """The (selected) group of the frontmost window of the current database. Returns root of current database if no current group exists."""
-        return self.get_property('currentGroup')
+        return self._get_property('currentGroup')
 
     @property
     def current_workspace(self) -> Optional[str]:
         """The name of the currently used workspace."""
-        return self.get_property('currentWorkspace')
+        return self._get_property('currentWorkspace')
 
     @property
     def inbox(self) -> Database:
         """The global inbox."""
-        return self.get_property('inbox')
+        return self._get_property('inbox')
 
     @property
     def incoming_group(self) -> Record:
         """The default group for new notes. Either global inbox or incoming group of current database if global inbox isn't available."""
-        return self.get_property('incomingGroup')
+        return self._get_property('incomingGroup')
 
     @property
     def last_downloaded_URL(self) -> str:
         """The actual URL of the last download."""
-        return self.get_property('lastDownloadedURL')
+        return self._get_property('lastDownloadedURL')
 
     @property
     def last_downloaded_response(self) -> Optional[Record]:
         """HTTP-Status, Last-Modified, Content-Type, Content-Length and Charset of last HTTP(S) response."""
-        return self.get_property('lastDownloadedResponse')
+        return self._get_property('lastDownloadedResponse')
 
     @property
     def preferred_import_destination(self) -> Record:
         """The default destination for data from external sources. See Preferences > Import > Destination."""
-        return self.get_property('preferredImportDestination')
+        return self._get_property('preferredImportDestination')
 
     @property
     def reading_list(self) -> List[dict]:
         """The items of the reading list."""
-        return self.get_property('readingList')
+        return self._get_property('readingList')
 
     @property
     def selection(self) -> list:
@@ -129,7 +129,7 @@ class DEVONthink3(Application):
     @property
     def workspaces(self) -> List[str]:
         """The names of all available workspaces."""
-        return self.get_property('workspaces')
+        return self._get_property('workspaces')
     
     # methods
     ## standard additions
@@ -154,11 +154,11 @@ class DEVONthink3(Application):
         }
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
-        return self.call_method('displayDialog', [text], kwargs)
+        return self._call_method('displayDialog', [text], kwargs)
     
     
     def display_notification(self, text: str, with_title: str = None, subtitle: str = None, sound_name: str = None) -> None:
-        return self.call_method('displayNotification', [text], {
+        return self._call_method('displayNotification', [text], {
             'withTitle': with_title,
             'subtitle': subtitle,
             'soundName': sound_name,
@@ -175,18 +175,18 @@ class DEVONthink3(Application):
             cancel_button (bool):  Display a button to cancel the process.
             steps (int):  The number of steps of the progress or a negative value for an indeterminate number.
         """
-        return self.call_method('showProgressIndicator', [title], {
+        return self._call_method('showProgressIndicator', [title], {
             'cancelButton': cancel_button,
             'steps': steps,
         })
     
     def hide_progress_indicator(self) -> bool:
         """Hide a visible progress indicator."""
-        return self.call_method('hideProgressIndicator')
+        return self._call_method('hideProgressIndicator')
         
     def step_progress_indicator(self, title) -> bool:
         """Go to next step of a progress."""
-        return self.call_method('stepProgressIndicator', [title])
+        return self._call_method('stepProgressIndicator', [title])
 
     def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> OSAObjArray[Record]:
         """Search for records in specified group or all databases.
@@ -199,7 +199,7 @@ class DEVONthink3(Application):
         Returns:
             List[Record]: The list of records matching the search string.
         """
-        return self.call_method('search', [text], {
+        return self._call_method('search', [text], {
             'comparision': comparision,
             'excludeSubgroups': excludeSubgroups,
         })
@@ -217,7 +217,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The imported record.
         """
-        return self.call_method('import', [file_path], {
+        return self._call_method('import', [file_path], {
             'from': source_app,
             'name': record_name,
             'placeholders': placeholders,
@@ -235,7 +235,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The record of the indicated file or folder.
         """
-        return self.call_method('indicate', text, {
+        return self._call_method('indicate', text, {
             'to': to_,
             'fileType': file_type,
         })
@@ -253,7 +253,7 @@ class DEVONthink3(Application):
         Returns:
             Database: The opened database.
         """
-        return self.call_method('open database', [file_path])
+        return self._call_method('open database', [file_path])
     
     def create_database(self, path: str) -> Database:
         """Create a new database.
@@ -264,7 +264,7 @@ class DEVONthink3(Application):
         Returns:
             Database: The new database object.
         """
-        return self.call_method('createDatabase', [path])
+        return self._call_method('createDatabase', [path])
 
     def create_location(self, path: str, database: Database = None) -> Record:
         """Create a hierarchy of groups if necessary.
@@ -276,7 +276,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The created record.
         """
-        return self.call_method('createLocation', [path], {
+        return self._call_method('createLocation', [path], {
             'in': database,
         })
 
@@ -289,7 +289,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The newly created record.
         """
-        return self.call_method('createRecordWith', [properties], {'in': in_})
+        return self._call_method('createRecordWith', [properties], {'in': in_})
 
     def delete(self, record: 'Record', in_: Optional['Record'] = None) -> bool:
         """Delete all instances of a record from the database or one instance from the specified group.
@@ -301,7 +301,7 @@ class DEVONthink3(Application):
         Returns:
             bool: `True` if the deletion was successful.
         """
-        return self.call_method('delete', [], {'record': record, 'in': in_})
+        return self._call_method('delete', [], {'record': record, 'in': in_})
 
     def get_database_with_uuid(self, text: str) -> Database:
         """Get database with the specified uuid.
@@ -312,7 +312,7 @@ class DEVONthink3(Application):
         Returns:
             Database: The database with the specified uuid.
         """
-        return self.call_method('getDatabaseWithUuid', [text])
+        return self._call_method('getDatabaseWithUuid', [text])
 
 
 
@@ -327,7 +327,7 @@ class DEVONthink3(Application):
         Returns:
             Union[Record, List[Record]]: The moved record or list of records.
         """
-        return self.call_method('move', [], {
+        return self._call_method('move', [], {
             'record': record,
             'to': to,
             'from': from_,
@@ -344,7 +344,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The replicated record.
         """
-        return self.call_method('replicate', [], {
+        return self._call_method('replicate', [], {
             'record': record,
             'to': to,
         })
@@ -359,7 +359,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The record at the specified location.
         """
-        return self.call_method('getRecordAt', [text], {'in': database})
+        return self._call_method('getRecordAt', [text], {'in': database})
 
     def get_record_with_uuid(self, text: str, database: Optional[Database] = None) -> Record:
         """Get record with the specified uuid or item link.
@@ -371,7 +371,7 @@ class DEVONthink3(Application):
         Returns:
             Record: The record with the specified uuid or item link.
         """
-        return self.call_method('getRecordWithUuid', [text], {'in': database})
+        return self._call_method('getRecordWithUuid', [text], {'in': database})
     
     def add_custom_meta_data(self, value, for_: str, to: Record):
         """Add user-defined metadata to a record. Setting a value for an unknown key automatically adds a definition to Preferences > Data.
@@ -387,7 +387,7 @@ class DEVONthink3(Application):
             for_ (str): The key for the user-defined value.
             to (Record): The record.
         """
-        return self.call_method('addCustomMetaData', [value], {'for': for_, 'to': to})
+        return self._call_method('addCustomMetaData', [value], {'for': for_, 'to': to})
     
     def get_custom_meta_data(self, for_: str, from_: Record, default_value=None):
         """Get user-defined metadata from a record.
@@ -404,7 +404,7 @@ class DEVONthink3(Application):
 
         if default_value is not None:
             payload['default_value'] = default_value
-        return self.call_method('getCustomMetaData', [], payload)
+        return self._call_method('getCustomMetaData', [], payload)
     
     def __repr__(self):
         return f'<DEVONthink3 {self.id}>'

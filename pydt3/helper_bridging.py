@@ -32,13 +32,13 @@ class OSAObjProxy:
     def associated_application(self) -> Optional[Application]:
         return self._associated_application
 
-    def set_property(self, name: str, value):
+    def _set_property(self, name: str, value):
         return self._helper_script.set_properties(self, {name: value})
 
-    def get_property(self, name: str):
+    def _get_property(self, name: str):
         return self._helper_script.get_properties(self, [name])[name]
     
-    def call_method(self, name: str, args = None, kwargs: dict = None):
+    def _call_method(self, name: str, args = None, kwargs: dict = None):
         return self._helper_script.call_method(self, name, args, kwargs)
 
     def __del__(self):
@@ -64,10 +64,10 @@ class OSAObjArray(Sequence[T], OSAObjProxy):
         raise NotImplementedError()
     
     def __len__(self) -> int:
-        return self.get_property('length')
+        return self._get_property('length')
 
     def __getitem__(self, index: int) -> T:
-        return self.call_method('at', args=[index])
+        return self._call_method('at', args=[index])
 
     def __iter__(self):
         return iter(self())
@@ -75,16 +75,12 @@ class OSAObjArray(Sequence[T], OSAObjProxy):
 class DefaultOSAObjProxy(OSAObjProxy):
     def __init__(self, script: HelperScript, obj_id: int, class_name: str):
         super().__init__(script, obj_id, class_name)
-    
-    # def __getattr__(self, name):
-    #     return self.get_property(name)
 
-    # def __setattr__(self, name, value):
-    #     try:
-    #         super().__setattr__(name, value)
-    #     except AttributeError:
-    #         self.set_property(name, value)
+    def __getitem__(self, key: str):
+        return self._get_property(key)
     
+    def __setitem__(self, key: str, value):
+        return self._set_property(key, value)
 
 
 

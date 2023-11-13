@@ -16,26 +16,26 @@ class Application(DefaultOSAObjProxy):
     @property
     def id(self) -> str:
         """The unique identifier of the application."""
-        return self.get_property('id')()
+        return self._get_property('id')()
     
     @property
     def name(self) -> str:
         """The name of the application."""
-        return self.get_property('name')() # The name is a function so it needs special handling
+        return self._get_property('name')() # The name is a function so it needs special handling
 
     @property
     def frontmost(self):
         """Whether the application is currently frontmost."""
-        return self.get_property('frontmost')()
+        return self._get_property('frontmost')()
 
     def activate(self):
         """Activate the application."""
-        self.call_method('activate')
+        self._call_method('activate')
 
     @lru_cache(maxsize=64)
     def parent_of_class(self, name: str):
         """Get the parent of the application of the specified class."""
-        return self.call_method('parentOfClass', args=[name])
+        return self._call_method('parentOfClass', args=[name])
 
 class ApplicationExtension:
     def __init__(self, app: Application):

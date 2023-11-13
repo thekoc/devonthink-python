@@ -13,22 +13,22 @@ class Database(OSAObjProxy):
     @property
     def contents(self) -> OSAObjArray['Record']:
         """The contents of the database."""
-        return self.get_property('contents')
+        return self._get_property('contents')
 
     @property
     def parents(self) -> List['Record']:
         """The parents of the database."""
-        return self.get_property('parents')
+        return self._get_property('parents')
 
     @property
     def records(self) -> List['Record']:
         """The records contained in the database."""
-        return self.get_property('records')
+        return self._get_property('records')
 
     @property
     def smart_groups(self) -> List['SmartGroup']:
         """The smart groups contained in the database."""
-        return self.get_property('smartGroups')
+        return self._get_property('smartGroups')
 
     # @property
     # def tag_groups(self) -> List[TagGroup]:
@@ -39,60 +39,60 @@ class Database(OSAObjProxy):
     @property
     def annotations_group(self) -> 'Record':
         """The group for annotations, will be created if necessary."""
-        return self.get_property('annotationsGroup')
+        return self._get_property('annotationsGroup')
 
     @property
     def comment(self) -> str:
         """The comment of the database."""
-        return self.get_property('comment')
+        return self._get_property('comment')
     
     @comment.setter
     def comment(self, value: str):
-        self.set_property('comment', value)
+        self._set_property('comment', value)
 
     @property
     def current_group(self) -> 'Record':
         """The (selected) group of the frontmost window. Returns root if no current group exists."""
-        return self.get_property('currentGroup')
+        return self._get_property('currentGroup')
 
     @property
     def encrypted(self) -> bool:
         """Specifies if a database is encrypted or not."""
-        return self.get_property('encrypted')
+        return self._get_property('encrypted')
 
     @property
     def id(self) -> int:
         """The scripting identifier of a database."""
-        return self.get_property('id')
+        return self._get_property('id')
 
     @property
     def incoming_group(self) -> 'Record':
         """The default group for new notes. Might be identical to root."""
-        return self.get_property('incomingGroup')
+        return self._get_property('incomingGroup')
 
     @property
     def name(self) -> str:
         """The name of the database."""
-        return self.get_property('name')
+        return self._get_property('name')
     
     @name.setter
     def name(self, value: str):
-        self.set_property('name', value)
+        self._set_property('name', value)
 
     @property
     def path(self) -> str:
         """The POSIX path of the database."""
-        return self.get_property('path')
+        return self._get_property('path')
 
     @property
     def read_only(self) -> bool:
         """Specifies if a database is read-only and can't be modified."""
-        return self.get_property('readOnly')
+        return self._get_property('readOnly')
 
     @property
     def root(self) -> 'Record':
         """The top level group of the database."""
-        return self.get_property('root')
+        return self._get_property('root')
 
     @property
     def sync_group(self) -> 'Record':
@@ -102,17 +102,17 @@ class Database(OSAObjProxy):
     @property
     def tags_group(self) -> 'Record':
         """The group for tags."""
-        return self.get_property('tagsGroup')
+        return self._get_property('tagsGroup')
 
     @property
     def trash_group(self) -> 'Record':
         """The trash's group."""
-        return self.get_property('trashGroup')
+        return self._get_property('trashGroup')
 
     @property
     def uuid(self) -> str:
         """The unique and persistent identifier of a database for external referencing."""
-        return self.get_property('uuid')
+        return self._get_property('uuid')
     
     def __repr__(self):
         return f'<Database {self.name}>'
