@@ -53,9 +53,6 @@ class CustomMetaData:
         return f'<{type(self).__name__}: {self.get_dict_value()}>'
 
 class Record(OSAObjProxy):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-
     # elements
     @property
     def children(self) -> OSAObjArray['Record']:
