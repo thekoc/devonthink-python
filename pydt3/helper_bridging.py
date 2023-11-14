@@ -42,7 +42,6 @@ class OSAObjProxy:
         return self._helper_script.call_method(self, name, args, kwargs)
 
     def __del__(self):
-        return
         if self._helper_script._osaobj_rc.get(self.obj_id) is None:
             return
         self._helper_script._osaobj_rc[self.obj_id] -= 1
@@ -61,8 +60,8 @@ class OSAObjArray(Sequence[T], OSAObjProxy):
         super().__init__(script, obj_id, class_name)
         self._cached_array = None
 
-    def whose(self, **kwargs) -> 'OSAObjArray[T]':
-        raise NotImplementedError()
+    def whose(self, filter) -> 'OSAObjArray[T]':
+        return self._call_method('whose', [filter])
     
     def __len__(self) -> int:
         return self._get_property('length')
