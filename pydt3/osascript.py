@@ -41,6 +41,10 @@ class OSAScript:
 
     def fourcharcode(self, chars: bytes):
         return int.from_bytes(chars, 'big')
+    
+
+    def __eq__(self, o: object) -> bool:
+        return self.script == o.script
 
 
 if __name__ == '__main__':
