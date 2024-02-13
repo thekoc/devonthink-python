@@ -36,7 +36,6 @@ class TestDEVONhinkApplication(unittest.TestCase):
         self.assertTrue(all(isinstance(db, dt3.Database) for db in dbs))
 
     def test_document_windows(self):
-        self.app.
         windows = self.app.document_windows
         self.assertTrue(isinstance(windows, OSAObjArray))
         self.assertTrue(len(windows) > 0)
