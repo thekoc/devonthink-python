@@ -5,101 +5,34 @@ import json
 import os
 import logging
 
-from typing import Any, Optional, TypeVar, Sequence, TYPE_CHECKING
-from Foundation import NSAppleScript
-from .osascript import OSAScript
+from typing import Optional, TYPE_CHECKING
+from functools import lru_cache
 
+from .osascript import OSAScript
+from .objproxy import OSAObjProxy, OSAObjArray, DefaultOSAObjProxy
 
 
 if TYPE_CHECKING:
+    from Foundation import NSAppleScript
     from .application import Application
+
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), 'jxa_helper.scpt')
 
-class OSAObjProxy:
-    def __init__(self, script: HelperScript, obj_id: int, class_name: str):
-        self._helper_script = script
-        self.obj_id = obj_id
-        self.class_name = class_name
-        self._associated_application = None
-        # reference count plus one
-        self._helper_script._osaobj_rc.setdefault(obj_id, 0)
-        self._helper_script._osaobj_rc[obj_id] += 1 
-    
-    @property
-    def associated_application(self) -> Optional[Application]:
-        return self._associated_application
-
-    def _set_property(self, name: str, value):
-        return self._helper_script.set_properties(self, {name: value})
-
-    def _get_property(self, name: str):
-        return self._helper_script.get_properties(self, [name])[name]
-    
-    def _call_method(self, name: str, args = None, kwargs: dict = None):
-        return self._helper_script.call_method(self, name, args, kwargs)
-
-    def __del__(self):
-        if self._helper_script._osaobj_rc.get(self.obj_id) is None:
-            return
-        self._helper_script._osaobj_rc[self.obj_id] -= 1
-        if self._helper_script._osaobj_rc[self.obj_id] <= 0:
-            self._helper_script.release_object_with_id(self.obj_id)
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self._helper_script.call_self(self, args, kwargs)
-
-
-T = TypeVar('T')
-class OSAObjArray(Sequence[T], OSAObjProxy):
-    """The proxy of the array container in JXA of type `T`
-    """
-    def __init__(self, script: HelperScript, obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-        self._cached_array = None
-
-    def whose(self, filter) -> 'OSAObjArray[T]':
-        return self._call_method('whose', [filter])
-    
-    def __len__(self) -> int:
-        return self._get_property('length')
-
-    def __getitem__(self, index: int) -> T:
-        return self._call_method('at', args=[index])
-
-    def __iter__(self):
-        return iter(self())
-
-class DefaultOSAObjProxy(OSAObjProxy):
-    def __init__(self, script: HelperScript, obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-
-    def __getitem__(self, key: str):
-        return self._get_property(key)
-    
-    def __setitem__(self, key: str, value):
-        return self._set_property(key, value)
-
-
 
 class HelperScript(OSAScript):
-    _NAME_CLASS_MAP = {}
+    _class_map = {} # type: dict[str, dict[str, type[OSAObjProxy]]]
+    _default_app_class_map = {}
 
     default: HelperScript
 
-    def __init__(self, script: NSAppleScript, application: Optional[Application] = None, osaobj_rc: Optional[dict] = None):
+    def __init__(self, script: NSAppleScript, osaobj_rc: Optional[dict] = None):
         super().__init__(script)
         self._osaobj_rc = {} if osaobj_rc is None else osaobj_rc
-        self._within_application = application
-    
-    def within_application(self, app: Application):
-        return HelperScript(self.script, app, self._osaobj_rc)
 
-    def _unwrap_from_json(self, response: dict, associated_application: Optional['Application'] = None):
-        if associated_application is None:
-            associated_application = self._within_application
+    def _unwrap_from_json(self, response: dict):
         if response['type'] == 'plain':
             return response.get('data')
         elif response['type'] == 'date':
@@ -107,44 +40,24 @@ class HelperScript(OSAScript):
             return datetime.datetime.fromtimestamp(data)
         elif response['type'] == 'reference':
             class_name = response.get('className', None)
+            app_name = response.get('app', None)
             obj_id = response['objId']
-            if class_name is not None and class_name.startswith('array::'):
-                reference_cls = OSAObjArray
-
-            elif class_name is not None:
-                current_class_name = class_name
-                reference_cls = None
-                while current_class_name is not None:
-                    reference_cls = self._NAME_CLASS_MAP.get(current_class_name)
-                    if reference_cls is not None:
-                        break
-                    if associated_application is not None:
-                        current_class_name = associated_application.parent_of_class(current_class_name)
-                    else:
-                        break
-
-            if reference_cls is None:
-                reference_cls = DefaultOSAObjProxy
-            
-            proxy = reference_cls(self.within_application(associated_application), obj_id, class_name)
-
-            if associated_application is not None and isinstance(proxy, OSAObjProxy):
-                proxy._associated_application = associated_application
-            
-            assert isinstance(proxy, OSAObjProxy)
+            reference_cls = self.determine_class(app_name, class_name)
+            assert issubclass(reference_cls, OSAObjProxy)
+            proxy = reference_cls(helper_script=self, obj_id=obj_id, class_name=class_name)
             return proxy
 
         elif response['type'] == 'array':
             data = response['data']
             assert isinstance(data, list)
             return [
-                self._unwrap_from_json(i, associated_application) for i in data
+                self._unwrap_from_json(i) for i in data
             ]
         elif response['type'] == 'dict':
             data = response['data']
             assert isinstance(data, dict)
             return {
-                k: self._unwrap_from_json(v, associated_application) for k, v in data.items()
+                k: self._unwrap_from_json(v) for k, v in data.items()
             }
 
     def _wrap_to_json(self: HelperScript, obj) -> dict:
@@ -169,6 +82,8 @@ class HelperScript(OSAScript):
                 'data': {k: self._wrap_to_json(v) for k, v in obj.items()}
             }
         elif isinstance(obj, OSAObjProxy):
+            if obj._helper_script is not self:
+                raise ValueError('The proxy object is not created by this script')
             return {
                 'type': 'reference',
                 'objId': obj.obj_id
@@ -189,13 +104,14 @@ class HelperScript(OSAScript):
         result = json.loads(result)
         return self._unwrap_from_json(result)
 
+
     def echo(self, params):
         return self._call_func_pyobj_inout('echo', params)
     
     def release_object_with_id(self, id: int):
         return self._call_func_pyobj_inout('releaseObjectWithId', {'id': id})
-    
-    def get_application(self, name: str) -> OSAObjProxy:
+
+    def get_application(self, name: str) -> Application:
         return self._call_func_pyobj_inout('getApplication', {'name': name})
     
     def eval_jxa_code_snippet(self, source: str, locals: Optional[dict] = None):
@@ -215,6 +131,40 @@ class HelperScript(OSAScript):
 
     def call_self(self, obj: OSAObjProxy, args = None, kwargs: dict = None):
         return self._call_func_pyobj_inout('callSelf', {'obj': obj, 'args': args, 'kwargs': kwargs})
+
+    def get_parent_of_class(self, application: str, class_name: str):
+        return self.eval_jxa_code_snippet(f'Application("{application}").parentOfClass("{class_name}")')
+
+    @lru_cache(maxsize=1024)
+    def determine_class(self, app_name: str, class_name: str | None) -> type[OSAObjProxy]:
+        if class_name is None:
+            return DefaultOSAObjProxy
+        elif class_name is not None and class_name.startswith('array::'):
+            return OSAObjArray
+
+        current_class_name = class_name
+        reference_cls = None
+        while current_class_name is not None:
+            logger.debug(f'current_class_name: {current_class_name}')
+            class_map = self._class_map.get(app_name, self._default_app_class_map)
+            reference_cls = class_map.get(current_class_name)
+            if reference_cls is not None:
+                return reference_cls
+            else:
+                current_class_name = self.get_parent_of_class(app_name, current_class_name)
+        # return DefaultOSAObjProxy
+
+    @classmethod
+    def register_class_map(cls, app_name: str, class_map: dict[str, type[OSAObjProxy]]):
+        cls._class_map[app_name] = class_map
+    
+    @classmethod
+    def set_default_class_map(cls, class_map: dict[str, type[OSAObjProxy]]):
+        cls._default_app_class_map = class_map
+
+    def __hash__(self) -> int:
+        return id(self)
+
 
 HelperScript.default = HelperScript.from_path(DEFAULT_SCRIPT_PATH)
 

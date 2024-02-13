@@ -2,9 +2,6 @@ from .record import Record
 from ...osascript import  OSAScript
 
 class SmartGroup(Record):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-
     # properties
     @property
     def exclude_subgroups(self) -> bool:

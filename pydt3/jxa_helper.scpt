@@ -1,5 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_'
-class ObjectPoolManager {
+JsOsaDAS1.001.00bplist00ÑVscript_''class ObjectPoolManager {
     constructor() {
         this._currentId = 0;
         this._objectIdMap = new Map();
@@ -27,12 +26,12 @@ class ObjectPoolManager {
 }
 
 class Util {
-    static getAssociatedApplication(obj) {
+    static getAssociatedApplicationName(obj) {
         let displayString = Automation.getDisplayString(obj);
         let m = displayString.match(/^Application\(['"]([^)]*)['"]\)/);
         if (m) {
             let name = m[1];
-            return Application(name);
+            return name;
         }
         return null;
     }
@@ -133,7 +132,7 @@ class JsonTranslator {
                     return {
                         type: 'reference',
                         objId: this.objectPoolManager.getId(obj),
-                        plainRepr: null,
+                        app: null,
                         className: 'unknown'
                     }
                 }
@@ -143,7 +142,7 @@ class JsonTranslator {
                 return {
                     type: 'reference',
                     objId: this.objectPoolManager.getId(obj),
-                    plainRepr: null,
+                    app: Util.getAssociatedApplicationName(obj),
                     className: 'application'
                 }
             }
@@ -152,7 +151,7 @@ class JsonTranslator {
                 return {
                     type: 'reference',
                     objId: this.objectPoolManager.getId(obj),
-                    plainRepr: null,
+                    app: Util.getAssociatedApplicationName(obj),
                     className: guessClass
                 }
             }
@@ -170,7 +169,7 @@ class JsonTranslator {
                 type: 'reference',
                 objId: this.objectPoolManager.getId(obj),
                 className: guessClass,
-                plainRepr: null
+                app: Util.getAssociatedApplicationName(obj),
             }
         }
 
@@ -280,9 +279,7 @@ function evalJXACodeSnippet({source, locals}) {
         eval(`var ${k} = locals[k];`);
     }
     const value = eval(source);
-    return {
-        'string': JSON.stringify(value)
-    }
+    return value;
 }
 evalJXACodeSnippet = jsonTranslator.strIOFuncWrapper(evalJXACodeSnippet);
 
@@ -340,4 +337,4 @@ callMethod = jsonTranslator.strIOFuncWrapper(callMethod);
 function callSelf({obj, args, kwargs}) {
     return obj(...args, kwargs);
 }
-callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              ' jscr  úÞÞ­
+callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              '= jscr  úÞÞ­

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Optional, Union, List, TYPE_CHECKING
 
-from ...application import Application, ApplicationExtension
-from ...osascript import OSAScript
+from ...application import Application
+from ...helper_bridging import HelperScript
 from ...helper_bridging import OSAObjArray
 
 if TYPE_CHECKING:
@@ -12,10 +12,9 @@ if TYPE_CHECKING:
     from .windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 
 
-
 class DEVONthink3(Application):
-    def __init__(self, name="DEVONthink 3", script: OSAScript = None) -> None:
-        super().__init__(name, script)
+    def __init__(self, helper_script: Optional[HelperScript] = None, obj_id: Optional[int] = None, class_name: Optional[str] = None):
+        super().__init__('DEVONthink 3', helper_script, obj_id, class_name)
         self._ext = DevonthinkExtension(self)
 
     @property
@@ -409,9 +408,9 @@ class DEVONthink3(Application):
     def __repr__(self):
         return f'<DEVONthink3 {self.id}>'
 
-class DevonthinkExtension(ApplicationExtension):
+class DevonthinkExtension():
     def __init__(self, app: DEVONthink3):
-        super().__init__(app)
+        self.app = app
     
     def db_by_name(self, name: str) -> Optional[Database]:
         dbs = self.app.databases

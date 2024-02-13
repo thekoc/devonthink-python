@@ -1,5 +1,5 @@
 *.pyc
-@*.py
+_*.py
 __pycache__/
 *.spec
 dist/
@@ -7,3 +7,6 @@ build/
 *.dtBase2/
 *.egg-info/
 docs/
+notes/
+.DS_Store
+.vscode/

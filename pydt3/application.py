@@ -1,31 +1,38 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from functools import lru_cache
 
-from .helper_bridging import OSAObjProxy, DefaultOSAObjProxy, HelperScript
+from typing import Optional
+
+from .objproxy import DefaultOSAObjProxy
+from .helper_bridging import HelperScript
+
+
 
 class Application(DefaultOSAObjProxy):
-    def __init__(self, name: str, script: HelperScript = None):
-        if script is None:
-            self._helper_script = HelperScript.default
+    def __init__(self, name: Optional[str] = None, helper_script: Optional[HelperScript] = None, obj_id: Optional[int] = None, class_name: Optional[str] = None):
+        if all([helper_script, obj_id, class_name]):
+            super().__init__(helper_script, obj_id, class_name)
+        elif name is not None:
+            helper_script = HelperScript.default
+            app = helper_script.get_application(name)
+            super().__init__(helper_script, app.obj_id, app.class_name)
         else:
-            self._helper_script = script
-        self.obj_id = None
-        response = self._helper_script.get_application(name)
-        super().__init__(self._helper_script, response.obj_id, response.class_name)
-        self._helper_script = self._helper_script.within_application(self)
-        self._associsated_application = self
-
+            raise ValueError('`name` or `helper_script`, `obj_id`, `class_name` must be provided')
+    
     @property
     def id(self) -> str:
         """The unique identifier of the application."""
         return self._call_method('id')
-    
+
     @property
     def name(self) -> str:
         """The name of the application."""
         return self._call_method('name') # The name is a function so it needs special handling
 
     @property
-    def frontmost(self):
+    def frontmost(self) -> bool:
         """Whether the application is currently frontmost."""
         return self._call_method('frontmost')
 
@@ -33,33 +40,11 @@ class Application(DefaultOSAObjProxy):
         """Activate the application."""
         return self._call_method('activate')
 
-    @lru_cache(maxsize=64)
+    @lru_cache(maxsize=1024)
     def parent_of_class(self, name: str):
         """Get the parent of the application of the specified class."""
         return self._call_method('parentOfClass', args=[name])
 
-class ApplicationExtension:
-    def __init__(self, app: Application):
-        self.app = app
-
-    def eval_jxa_code_snippet(self, source: str, locals: dict = None):
-        """Evaluate a JXA code piece."""
-        if locals is None:
-            locals = {}
-        script = self.app.script
-        payload = {
-            'source': source,
-            'locals': locals
-        }
-        payload = OSAObjProxy.pyobj_to_json( payload)
-        return OSAObjProxy.json_to_pyobj(script, script.call_json('evalJXACodeSnippet', payload))
-    
-    def eval_applescript_code_snippet(self, source: str):
-        """Evaluate an AppleScript code piece."""
-        script = self.app.script
-        payload = {
-            'source': source,
-        }
-        payload = OSAObjProxy.pyobj_to_json(payload)
-        return OSAObjProxy.json_to_pyobj(script, script.call_json('evalAppleScriptCodeSnippet', params=payload))
-    
+HelperScript.set_default_class_map({
+    'application': Application
+})

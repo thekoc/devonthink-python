@@ -10,14 +10,15 @@ from .smartgroup import SmartGroup
 from .text import Text
 from .windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 
-
-HelperScript._NAME_CLASS_MAP['database'] = Database
-HelperScript._NAME_CLASS_MAP['item'] = Item
-HelperScript._NAME_CLASS_MAP['record'] = Record
-HelperScript._NAME_CLASS_MAP['reminder'] = Reminder
-HelperScript._NAME_CLASS_MAP['text'] = Text
-HelperScript._NAME_CLASS_MAP['smartGroup'] = SmartGroup
-
-HelperScript._NAME_CLASS_MAP['thinkWindow'] = ThinkWindow
-HelperScript._NAME_CLASS_MAP['documentWindow'] = DocumentWindow
-HelperScript._NAME_CLASS_MAP['viewerWindow'] = ViewerWindow
+HelperScript.register_class_map(app_name='DEVONthink 3', class_map={
+    'application': DEVONthink3,
+    'database': Database,
+    'item': Item,
+    'record': Record,
+    'reminder': Reminder,
+    'text': Text,
+    'smartGroup': SmartGroup,
+    'thinkWindow': ThinkWindow,
+    'documentWindow': DocumentWindow,
+    'viewerWindow': ViewerWindow
+})

@@ -7,9 +7,6 @@ from .text import Text
 from .database import Database
 
 class ThinkWindow(OSAObjProxy):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-
     # elements
     @property
     def contains_tabs(self) -> bool:

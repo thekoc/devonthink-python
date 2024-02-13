@@ -6,9 +6,6 @@ from .record import Record
 from .smartgroup import SmartGroup
 
 class Database(OSAObjProxy):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-        
     # elements
     @property
     def contents(self) -> OSAObjArray['Record']:

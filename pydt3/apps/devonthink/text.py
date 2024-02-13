@@ -5,11 +5,9 @@ from ...helper_bridging import OSAObjProxy
 from typing import List, TYPE_CHECKING
 
 class Text(OSAObjProxy):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-
     def __str__(self) -> str:
-        return self()
+        result = self()
+        return result if result is not None else ''
     
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self}>'
