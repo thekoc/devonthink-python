@@ -40,11 +40,6 @@ class Application(DefaultOSAObjProxy):
         """Activate the application."""
         return self._call_method('activate')
 
-    @lru_cache(maxsize=1024)
-    def parent_of_class(self, name: str):
-        """Get the parent of the application of the specified class."""
-        return self._call_method('parentOfClass', args=[name])
-
 HelperScript.set_default_class_map({
     'application': Application
 })

@@ -1,9 +1,9 @@
 import unittest
 import logging
 import typing
+import pydt3.apps.devonthink as dt3
 
 from pydt3 import DEVONthink3
-from pydt3.apps.devonthink.database import Database
 from pydt3.helper_bridging import OSAObjArray
 
 logger = logging.getLogger(__name__)
@@ -33,8 +33,14 @@ class TestDEVONhinkApplication(unittest.TestCase):
         dbs  = self.app.databases
         self.assertTrue(isinstance(dbs, OSAObjArray))
         self.assertTrue(len(dbs) > 0)
-        self.assertTrue(all(isinstance(db, Database) for db in dbs))
+        self.assertTrue(all(isinstance(db, dt3.Database) for db in dbs))
 
+    def test_document_windows(self):
+        self.app.
+        windows = self.app.document_windows
+        self.assertTrue(isinstance(windows, OSAObjArray))
+        self.assertTrue(len(windows) > 0)
+        self.assertTrue(all(isinstance(window, dt3.DocumentWindow) for window in windows))
 
 if __name__ == '__main__':
     unittest.main()

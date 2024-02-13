@@ -35,7 +35,7 @@ class DEVONthink3(Application):
         return self._get_property('databases')
     
     @property
-    def dcoument_windows(self) -> OSAObjArray[DocumentWindow]:
+    def document_windows(self) -> OSAObjArray[DocumentWindow]:
         return self._get_property('documentWindows')
 
     @property
