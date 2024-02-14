@@ -95,9 +95,8 @@ class HelperScript(OSAScript):
 
         params = self._wrap_to_json(params)
         logger.debug(f'func_name: {func_name}')
-        logger.debug(f'params: {params}')
-
         params = json.dumps(params)
+        logger.debug(f'params: {params}')
         result = self._call_str(func_name, params)
         logger.debug(f'result: {result}')
 
@@ -139,8 +138,11 @@ class HelperScript(OSAScript):
     def determine_class(self, app_name: str, class_name: str | None) -> type[OSAObjProxy]:
         if class_name is None:
             return DefaultOSAObjProxy
-        elif class_name is not None and class_name.startswith('array::'):
+        elif class_name.startswith('array::'):
             return OSAObjArray
+        elif class_name == 'function':
+            return DefaultOSAObjProxy
+
 
         current_class_name = class_name
         reference_cls = None
@@ -150,9 +152,12 @@ class HelperScript(OSAScript):
             reference_cls = class_map.get(current_class_name)
             if reference_cls is not None:
                 return reference_cls
+            elif app_name is None:
+                return DefaultOSAObjProxy
             else:
                 current_class_name = self.get_parent_of_class(app_name, current_class_name)
-        # return DefaultOSAObjProxy
+
+        return DefaultOSAObjProxy
 
     @classmethod
     def register_class_map(cls, app_name: str, class_map: dict[str, type[OSAObjProxy]]):

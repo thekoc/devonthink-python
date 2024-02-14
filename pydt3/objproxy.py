@@ -83,3 +83,6 @@ class DefaultOSAObjProxy(OSAObjProxy):
     
     def __setitem__(self, key: str, value):
         return self._set_property(key, value)
+    
+    def __getattr__(self, name: str):
+        return self._get_property(name)
