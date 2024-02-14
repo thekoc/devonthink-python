@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_''class ObjectPoolManager {
+JsOsaDAS1.001.00bplist00ÑVscript_*æclass ObjectPoolManager {
     constructor() {
         this._currentId = 0;
         this._objectIdMap = new Map();
@@ -59,16 +59,18 @@ class Util {
         if (this.guessIsSpecifierContainer(specifier)) {
             return 'array::' + classOf;
         }
-        try {
-            specifierClass = specifier.class();
-        } catch (e) {
-            if (e.errorNumber === -1700) {
-                // The object is not a specifier.
-                return classOf;
+        if (specifier.class !== undefined) {
+            try {
+                specifierClass = specifier.class();
+            } catch (e) {
+                if (e.errorNumber === -1700) {
+                    // The object is not a specifier.
+                    return classOf;
+                }
             }
+            return specifierClass;
         }
-
-        return specifierClass;
+        return classOf;
     }
 
     static isJsonNode(obj) {
@@ -122,20 +124,30 @@ class JsonTranslator {
                 // This could mean that the object is a reference to a primitive value.
                 // eg. a `number`, `bool` or `string`.
                 // In that case, the best we can do is to return the evaluated value.
-                let evaluated = obj();
-                if (Util.isJsonNode(evaluated)) {
-                    return {
-                        type: 'plain',
-                        data: evaluated
-                    };
-                } else {
+                try {
+                    let evaluated = obj();
+                    if (Util.isJsonNode(evaluated)) {
+                        return {
+                            type: 'plain',
+                            data: evaluated
+                        };
+                    } else {
+                        return {
+                            type: 'reference',
+                            objId: this.objectPoolManager.getId(obj),
+                            app: Util.getAssociatedApplicationName(obj),
+                            className: 'unknown'
+                        }
+                    }
+                } catch (error) {
                     return {
                         type: 'reference',
                         objId: this.objectPoolManager.getId(obj),
-                        app: null,
+                        app: Util.getAssociatedApplicationName(obj),
                         className: 'unknown'
                     }
                 }
+
             }
 
             if (guessClass === 'application') {
@@ -229,16 +241,28 @@ class JsonTranslator {
             }
             return obj.data;
         } else if (obj.type === 'reference') {
-            return this.objectPoolManager.getObject(obj.objId);
+            try {
+                return this.objectPoolManager.getObject(obj.objId);
+            } catch (error) {
+                console.log(`Error unwrapping object with id: ${obj.objId}`);
+            }
         }
     }
 
     strIOFuncWrapper(func) {
         return  (strParams) => {
             let params = JSON.parse(strParams);
-            params = this.unwrapFromJson(params);
+            try {
+                params = this.unwrapFromJson(params);
+            } catch (error) {
+                console.log(`Error unwrapping params: ${error}`);
+            }
             let result = func(params);
-            result = this.wrapToJson(result);
+            try {
+                result = this.wrapToJson(result);
+            } catch (error) {
+                console.log(`Error wrapping result: ${error}`);
+            }
             return JSON.stringify(result);
         }
     }
@@ -337,4 +361,4 @@ callMethod = jsonTranslator.strIOFuncWrapper(callMethod);
 function callSelf({obj, args, kwargs}) {
     return obj(...args, kwargs);
 }
-callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              '= jscr  úÞÞ­
+callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              *üjscr  úÞÞ­
