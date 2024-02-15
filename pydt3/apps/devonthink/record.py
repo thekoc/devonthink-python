@@ -158,7 +158,8 @@ class Record(OSAObjProxy):
     @property
     def cells(self) -> Optional[OSAObjArray[OSAObjArray[str]]]:
         """The cells of a sheet. This is a list of rows, each row contains a list of string values for the various colums."""
-        return self._get_property('cells')
+        raise NotImplementedError('Not implemented. It is broken in JXA.')
+        # return self._get_property('cells')
 
     @property
     def character_count(self) -> int:
@@ -425,7 +426,7 @@ class Record(OSAObjProxy):
     @modification_date.setter
     def modification_date(self, value: datetime.datetime):
         # TODO: Implement change of modification date
-        raise NotImplementedError
+        return self._set_property('modificationDate', value)
 
     @property
     def name(self) -> str:

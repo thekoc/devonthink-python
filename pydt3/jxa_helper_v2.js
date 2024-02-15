@@ -6,8 +6,12 @@ class ObjectPoolManager {
     }
 
     getObject(id) {
-        return this._idObjectMap.get(id);
-    }
+        try {
+            return this._idObjectMap.get(id);
+        } catch (error) {
+            console.log(`Error getting object with id: ${id}`);
+        }
+     }
 
     getId(obj) {
         if (!this._objectIdMap.has(obj)) {
@@ -131,6 +135,11 @@ class JsonTranslator {
                             type: 'plain',
                             data: evaluated
                         };
+                    } else if (evaluated instanceof Date) {
+                        return {
+                            type: 'date',
+                            data: evaluated.getTime() / 1000
+                        }
                     } else {
                         return {
                             type: 'reference',

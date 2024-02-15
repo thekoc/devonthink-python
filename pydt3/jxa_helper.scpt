@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_*æclass ObjectPoolManager {
+JsOsaDAS1.001.00bplist00ÑVscript_,;class ObjectPoolManager {
     constructor() {
         this._currentId = 0;
         this._objectIdMap = new Map();
@@ -6,8 +6,12 @@ JsOsaDAS1.001.00bplist00ÑVscript_*æclass ObjectPoolManager {
     }
 
     getObject(id) {
-        return this._idObjectMap.get(id);
-    }
+        try {
+            return this._idObjectMap.get(id);
+        } catch (error) {
+            console.log(`Error getting object with id: ${id}`);
+        }
+     }
 
     getId(obj) {
         if (!this._objectIdMap.has(obj)) {
@@ -131,6 +135,11 @@ class JsonTranslator {
                             type: 'plain',
                             data: evaluated
                         };
+                    } else if (evaluated instanceof Date) {
+                        return {
+                            type: 'date',
+                            data: evaluated.getTime() / 1000
+                        }
                     } else {
                         return {
                             type: 'reference',
@@ -361,4 +370,4 @@ callMethod = jsonTranslator.strIOFuncWrapper(callMethod);
 function callSelf({obj, args, kwargs}) {
     return obj(...args, kwargs);
 }
-callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              *üjscr  úÞÞ­
+callSelf = jsonTranslator.strIOFuncWrapper(callSelf);                              ,Q jscr  úÞÞ­
