@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from typing import Any, Optional, TypeVar, Sequence, TYPE_CHECKING
+
 
 if TYPE_CHECKING:
     from .helper_bridging import HelperScript
+
+logger = logging.getLogger(__name__)
+
 
 class OSAObjProxy:
     def __init__(self, helper_script: Optional[HelperScript] = None, obj_id: Optional[int] = None, class_name: Optional[str] = None):
@@ -27,6 +33,7 @@ class OSAObjProxy:
             raise ValueError('obj_id is None')
         self._helper_script._osaobj_rc.setdefault(obj_id, 0)
         self._helper_script._osaobj_rc[obj_id] -= 1
+        logger.debug(f'decrease reference count for {obj_id}, current count: {self._helper_script._osaobj_rc[obj_id]}')
         if self._helper_script._osaobj_rc[obj_id] <= 0:
             self._helper_script.release_object_with_id(obj_id)
     

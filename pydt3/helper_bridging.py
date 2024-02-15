@@ -43,6 +43,7 @@ class HelperScript(OSAScript):
             app_name = response.get('app', None)
             obj_id = response['objId']
             reference_cls = self.determine_class(app_name, class_name)
+            logger.debug(f'determined reference_cls: {reference_cls}')
             assert issubclass(reference_cls, OSAObjProxy)
             proxy = reference_cls(helper_script=self, obj_id=obj_id, class_name=class_name)
             return proxy
@@ -147,7 +148,6 @@ class HelperScript(OSAScript):
         current_class_name = class_name
         reference_cls = None
         while current_class_name is not None:
-            logger.debug(f'current_class_name: {current_class_name}')
             class_map = self._class_map.get(app_name, self._default_app_class_map)
             reference_cls = class_map.get(current_class_name)
             if reference_cls is not None:
