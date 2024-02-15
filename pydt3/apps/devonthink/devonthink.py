@@ -387,7 +387,42 @@ class DEVONthink3(Application):
             to (Record): The record.
         """
         return self._call_method('addCustomMetaData', [value], {'for': for_, 'to': to})
-    
+
+    def open_tab_for(self, in_think_window: ThinkWindow = None, record: Record = None, referrer: str = None, url: str = None) -> Tab:
+        """Open a new tab for the specified URL or record in a think window.
+
+        Args:
+            in_think_window (ThinkWindow, optional): The think window that should open a new tab. A new window is used otherwise.
+            record (Record, optional): The record to open.
+            referrer (str, optional): The HTTP referrer.
+            url (str, optional): The URL to open.
+
+        Returns:
+            Tab: The newly opened tab.
+        """
+        kwargs = {}
+        if in_think_window is not None:
+            kwargs['in'] = in_think_window
+        if record is not None:
+            kwargs['record'] = record
+        if referrer is not None:
+            kwargs['referrer'] = referrer
+        if url is not None:
+            kwargs['url'] = url
+        return self._call_method('openTabFor', args=None, kwargs=kwargs)
+
+    def open_window_for(self, record: Record, force: bool = False) -> ThinkWindow:
+        """Open a (new) viewer or document window for the specified record (use the 'close' command to close a window). Only recommended for viewer windows, use 'open tab for' for document windows.
+
+        Args:
+            record (Record): The record to open.
+            force (bool, optional): Force DEVONthink to always open a new window, even if the record is already opened in one. Off by default.
+
+        Returns:
+            ThinkWindow: The newly opened think window.
+        """
+        return self._call_method('openWindowFor', kwargs={'record': record, 'force': force})
+
     def get_custom_meta_data(self, for_: str, from_: Record, default_value=None):
         """Get user-defined metadata from a record.
 
