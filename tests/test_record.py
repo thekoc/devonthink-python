@@ -12,14 +12,16 @@ logging.basicConfig(level=logging.INFO)
 
 
 class TestRecord(unittest.TestCase):
-    def __init__(self, methodName="runTest"):
-        super().__init__(methodName)
-        dbs = DEVONthink3().databases
+    def setUp(self) -> None:
+        self.app = DEVONthink3()
+        dbs = self.app.databases
         assert len(dbs) > 0, "No databases found"
-        logger.info(f"Found {len(dbs)} databases")
-        self.dbs = dbs
-        self.records = [record for db in dbs for record in db.contents]
-        logger.info(f"Found {len(self.records)} records")
+        self.dbs = [db for db in dbs if db.name == "test-db"]
+        self.records: typing.Sequence[Record] = [record for db in self.dbs for record in db.contents]
+
+
+    def tearDown(self) -> None:
+        pass
     
     def test_general(self):
         record: Record
@@ -33,6 +35,10 @@ class TestRecord(unittest.TestCase):
             self.assertTrue(isinstance(record.rich_text, (Text, type(None))))
             self.assertTrue(isinstance(record.reminder, (Reminder, type(None))))
             self.assertTrue(isinstance(record.type, str))
+            print(record.modification_date)
+            self.assertTrue(isinstance(record.modification_date, datetime.datetime))
+            self.assertTrue(isinstance(record.addition_date, datetime.datetime))
+            self.assertTrue(isinstance(record.creation_date, datetime.datetime))
     
     def test_children(self):
         for record in self.records:
@@ -68,6 +74,10 @@ class TestRecord(unittest.TestCase):
             aliases = record.aliases
             self.assertTrue(isinstance(aliases, str))
 
+    def test_altitude(self):
+        for record in self.records:
+            altitude = record.altitude
+            self.assertTrue(isinstance(altitude, (int, float)))
 
     def test_tags(self):
         for record in self.records:
@@ -83,3 +93,30 @@ class TestRecord(unittest.TestCase):
                 self.assertTrue(isinstance(all_document_dates, typing.Sequence))
                 self.assertTrue(all(isinstance(date, datetime.datetime) for date in all_document_dates))
     
+    def test_annotation(self):
+        for record in self.records:
+            annotation = record.annotation
+            self.assertTrue(isinstance(annotation, (Record, type(None))))
+
+        # Test setting annotation
+        test_record = self.app.create_record_with({
+            "name": "unittest_record",
+            "type": "text",
+        })
+
+        annotation = self.app.create_record_with({
+            "name": "unittest_annotation",
+            "type": "text",
+            'plain text': 'This is a test annotation'
+        })
+
+        test_record.annotation = annotation
+        self.assertTrue(test_record.annotation.uuid == annotation.uuid)
+
+        self.app.delete(test_record)
+        self.app.delete(annotation)
+    
+    def test_annotation_count(self):
+        for record in self.records:
+            annotation_count = record.annotation_count
+            self.assertTrue(isinstance(annotation_count, int))

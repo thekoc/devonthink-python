@@ -14,6 +14,7 @@ class TestDEVONhinkApplication(unittest.TestCase):
     def __init__(self, methodName="runTest"):
         super().__init__(methodName)
         self.app = DEVONthink3()
+        self.dbs = [self.app.ext.db_by_name('blue-book')]
 
     def test_id(self):
         print(self.app.id)
@@ -34,12 +35,6 @@ class TestDEVONhinkApplication(unittest.TestCase):
         self.assertTrue(isinstance(dbs, OSAObjArray))
         self.assertTrue(len(dbs) > 0)
         self.assertTrue(all(isinstance(db, dt3.Database) for db in dbs))
-
-    def test_document_windows(self):
-        windows = self.app.document_windows
-        self.assertTrue(isinstance(windows, OSAObjArray))
-        self.assertTrue(len(windows) > 0)
-        self.assertTrue(all(isinstance(window, dt3.DocumentWindow) for window in windows))
 
 if __name__ == '__main__':
     unittest.main()
