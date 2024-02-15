@@ -76,18 +76,34 @@ extractNameFrom text : fully formatted email address
 ```python
 class Example(OSAObjProxy):
     # ========== Methods ==========
-    def check_for_new_mail(self, account: Account = None):
-        """Triggers a check for email."""
+    def check_for_new_mail(self, account: Account = None) -> None:
+        """Triggers a check for email.
+        
+        Args:
+            account (Account, optional): Specify the account that you wish to check for mail.
+        
+        Returns:
+            None
+        """
         if account is None:
             return self._call_method('checkForNewMail')
         else:
             return self._call_method('checkForNewMail', args=None, kwargs={'for': account})
     
     def extract_name_from(self, text: str) -> str:
-        """Command to get the full name out of a fully specified email address."""
+        """Command to get the full name out of a fully specified email address.
+        
+        Args:
+            text (str): fully formatted email address.
+        
+        Returns:
+            str: the full name
+        """
         return self._call_method('extractNameFrom', args=[text], kwargs=None)
 ```
 
 This approach should be applied to all objects, properties, and methods in the JXA file to create their corresponding Python counterparts.
+
+When converting, just output the methods and properties of the class. Do not include the class definition or any imports.
 
 If you understood, reply "Ready" and I'll send you a sdef file. Respond with python code and nothing else.
