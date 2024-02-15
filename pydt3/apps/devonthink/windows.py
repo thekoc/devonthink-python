@@ -142,9 +142,6 @@ class ThinkWindow(OSAObjProxy):
 
 
 class DocumentWindow(ThinkWindow):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
-    
     @property
     def record(self) -> Record:
         """The record of the visible document."""
@@ -154,8 +151,6 @@ class DocumentWindow(ThinkWindow):
 
 
 class ViewerWindow(ThinkWindow):
-    def __init__(self, script: 'OSAScript', obj_id: int, class_name: str):
-        super().__init__(script, obj_id, class_name)
     # elements
     @property
     def selected_records(self) -> List[Record]:
