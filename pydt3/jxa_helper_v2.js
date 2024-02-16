@@ -177,15 +177,6 @@ class JsonTranslator {
                 }
             }
 
-            // If the evaluated object is a plain object, return the evaluated value.
-            // WARNING: This may cause problems if the object is a reference to a text or dict.
-            //          In that case, the object "can" be interpreted as a plain object but still
-            //          has properties that are references to other objects.
-            // let evaluated = obj();
-            // if (!Util.isPlainJson(evaluated)) {
-            //     evaluated = null;
-            // }
-
             return {
                 type: 'reference',
                 objId: this.objectPoolManager.getId(obj),
