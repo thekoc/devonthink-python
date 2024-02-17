@@ -6,7 +6,7 @@ class SmartGroup(Record):
     @property
     def exclude_subgroups(self) -> bool:
         """Exclude subgroups of the search group from searching."""
-        return self._get_property('excludeSubgroups')
+        return self._call_method('excludeSubgroups')
 
     @exclude_subgroups.setter
     def exclude_subgroups(self, value: bool):
@@ -15,7 +15,7 @@ class SmartGroup(Record):
     @property
     def highlight_occurrences(self) -> bool:
         """Highlight found occurrences in documents."""
-        return self._get_property('highlightOccurrences')
+        return self._call_method('highlightOccurrences')
 
     @highlight_occurrences.setter
     def highlight_occurrences(self, value: bool):
