@@ -14,14 +14,15 @@ if TYPE_CHECKING:
     from .text import Text
 
 class CustomMetaData:
-
     def __init__(self, owner: 'Record', property_name: str):
         self.owner = owner
         self.meta_dict = owner._get_property(property_name)
         self.property_name = property_name
+        self._helper_script = owner._helper_script
+        self._app = DEVONthink3.from_script(self._helper_script)
 
     def get_dict_value(self):
-        value = self.meta_dict;
+        value = self.meta_dict();
         if value is None:
             value = {}
         return value
@@ -33,19 +34,10 @@ class CustomMetaData:
         return self.get_dict_value()
     
     def __getitem__(self, key: str) -> Any:
-        if isinstance(self.owner.associated_application, DEVONthink3):
-            return self.owner.associated_application.get_custom_meta_data(key, self.owner)
-        else:
-            return self.get_dict_value().get(key)
+        return self._app.get_custom_meta_data(key, self.owner)
 
     def __setitem__(self, key: str, value: Any):
-        if isinstance(self.owner.associated_application, DEVONthink3):
-            return self.owner.associated_application.add_custom_meta_data(value, key, self.owner)
-        else:
-            return self.get_dict_value().get(key)
-            prev_dict = self.get_dict_value()
-            prev_dict[key] = value
-            self.owner._set_property(self.property_name, prev_dict)
+        return self._app.add_custom_meta_data(value, key, self.owner)
 
     def __repr__(self) -> str:
         return f'<{type(self).__name__}: {self.get_dict_value()}>'

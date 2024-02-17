@@ -29,6 +29,10 @@ class DEVONthink3(Application):
         """
         return self._ext
     
+    @classmethod
+    def from_script(cls, script: HelperScript) -> DEVONthink3:
+        return script.get_application("DEVONthink 3")
+    
     # elements
     @property
     def databases(self) -> OSAObjArray[Database]:
