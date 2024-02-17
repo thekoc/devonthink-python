@@ -325,10 +325,7 @@ getProperty = jsonTranslator.strIOFuncWrapper(_getProperty);
 function _getProperties({obj, properties}) {
     let result = {};
     for (let k of properties) {
-        result[k] = obj[k];
-        if (Util.isMethod(result[k])) {
-            result[k] = result[k].bind(obj);
-        }
+        result[k] = _getProperty({obj, name: k});
     }
     return result;
 }

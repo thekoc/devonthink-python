@@ -1,4 +1,4 @@
-JsOsaDAS1.001.00bplist00ÑVscript_+class ObjectPoolManager {
+JsOsaDAS1.001.00bplist00ÑVscript_*Ëclass ObjectPoolManager {
     constructor() {
         this._currentId = 0;
         this._objectIdMap = new Map();
@@ -325,10 +325,7 @@ getProperty = jsonTranslator.strIOFuncWrapper(_getProperty);
 function _getProperties({obj, properties}) {
     let result = {};
     for (let k of properties) {
-        result[k] = obj[k];
-        if (Util.isMethod(result[k])) {
-            result[k] = result[k].bind(obj);
-        }
+        result[k] = _getProperty({obj, name: k});
     }
     return result;
 }
@@ -365,4 +362,4 @@ callMethod = jsonTranslator.strIOFuncWrapper(_callMethod);
 function _callSelf({obj, args, kwargs}) {
     return obj(...args, kwargs);
 }
-callSelf = jsonTranslator.strIOFuncWrapper(_callSelf);                              +*jscr  úÞÞ­
+callSelf = jsonTranslator.strIOFuncWrapper(_callSelf);                              *á jscr  úÞÞ­
