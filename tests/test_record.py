@@ -35,7 +35,6 @@ class TestRecord(unittest.TestCase):
             self.assertTrue(isinstance(record.rich_text, (Text, type(None))))
             self.assertTrue(isinstance(record.reminder, (Reminder, type(None))))
             self.assertTrue(isinstance(record.type, str))
-            print(record.modification_date)
             self.assertTrue(isinstance(record.modification_date, datetime.datetime))
             self.assertTrue(isinstance(record.addition_date, datetime.datetime))
             self.assertTrue(isinstance(record.creation_date, datetime.datetime))
