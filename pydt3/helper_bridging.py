@@ -120,6 +120,15 @@ class HelperScript(OSAScript):
     def eval_applescript_code_snippet(self, source: str, locals: Optional[dict] = None):
         return self._call_func_pyobj_inout('evalAppleScriptCodeSnippet', {'source': source, 'locals': locals})
 
+    def get_property(self, obj: OSAObjProxy, property: str, evaluated: bool = False):
+        kwargs = {
+            'obj': obj,
+            'name': property,
+        }
+        if evaluated:
+            kwargs['evaluated'] = evaluated
+        return self._call_func_pyobj_inout('getProperty', kwargs)
+
     def get_properties(self, obj: OSAObjProxy, properties: list):
         return self._call_func_pyobj_inout('getProperties', {'obj': obj, 'properties': properties})
 

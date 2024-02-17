@@ -53,8 +53,8 @@ class OSAObjProxy:
     def _set_property(self, name: str, value):
         return self._helper_script.set_properties(self, {name: value})
 
-    def _get_property(self, name: str):
-        return self._helper_script.get_properties(self, [name])[name]
+    def _get_property(self, name: str, evaluated: bool = False):
+        return self._helper_script.get_property(self, name, evaluated)
     
     def _call_method(self, name: str, args = None, kwargs: dict = None):
         return self._helper_script.call_method(self, name, args, kwargs)
