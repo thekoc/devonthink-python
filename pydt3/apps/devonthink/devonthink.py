@@ -109,7 +109,7 @@ class DEVONthink3(Application):
     @property
     def reading_list(self) -> List[dict]:
         """The items of the reading list."""
-        return self._get_property('readingList')
+        return self._get_property('readingList', evaluated=True)
 
     @property
     def selection(self) -> list:

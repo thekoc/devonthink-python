@@ -36,5 +36,9 @@ class TestDEVONhinkApplication(unittest.TestCase):
         self.assertTrue(len(dbs) > 0)
         self.assertTrue(all(isinstance(db, dt3.Database) for db in dbs))
 
+    def test_reading_list(self):
+        reading_list = self.app.reading_list
+        self.assertTrue(all(isinstance(item, dict) for item in reading_list))
+
 if __name__ == '__main__':
     unittest.main()
