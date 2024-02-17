@@ -169,7 +169,6 @@ class DEVONthink3(Application):
     
     
     # DEVONthink suit
-
     def show_progress_indicator(self, title: str, cancel_button: bool, steps: int) -> bool:
         """Show a progress indicator or update an already visible indicator. You have to ensure that the indicator is hidden again via 'hide progress indicator' when the script ends or if an error occurs.
         
@@ -269,43 +268,6 @@ class DEVONthink3(Application):
         """
         return self._call_method('createDatabase', [path])
 
-    def create_location(self, path: str, database: Database = None) -> Record:
-        """Create a hierarchy of groups if necessary.
-
-        Args:
-            path (str): The hierarchy as a POSIX path (/ in names has to be replaced with \/, see location property).
-            database (Database, optional): The database. Uses current database if not specified.
-
-        Returns:
-            Record: The created record.
-        """
-        return self._call_method('createLocation', [path], {
-            'in': database,
-        })
-
-    def create_record_with(self, properties: dict, in_: Optional['Record'] = None) -> Record:
-        """Create a new record.
-
-        Args:
-            record (dict): The properties of the record. Possible keys for record are 'name', 'type', 'comment', 'path', 'URL', 'creation date', 'modification date', 'date', 'plain text', 'rich text', 'source', 'data', 'content', 'columns', 'cells', 'thumbnail' and 'tags'.
-            in_ (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
-        Returns:
-            Record: The newly created record.
-        """
-        return self._call_method('createRecordWith', [properties], {'in': in_})
-
-    def delete(self, record: 'Record', in_: Optional['Record'] = None) -> bool:
-        """Delete all instances of a record from the database or one instance from the specified group.
-
-        Args:
-            record (Record): The record to delete.
-            in_ (Record, optional): The parent group of this instance. Deletes all instances of the record from the database if not specified.
-
-        Returns:
-            bool: `True` if the deletion was successful.
-        """
-        return self._call_method('delete', [], {'record': record, 'in': in_})
-
     def get_database_with_uuid(self, text: str) -> Database:
         """Get database with the specified uuid.
 
@@ -391,6 +353,351 @@ class DEVONthink3(Application):
             to (Record): The record.
         """
         return self._call_method('addCustomMetaData', [value], {'for': for_, 'to': to})
+
+    def add_download(self, url: str, automatic: bool = False, password: str = None, referrer: str = None, user: str = None) -> bool:
+        """Add a URL to the download manager.
+        
+        Args:
+            url (str): The URL to add.
+            automatic (bool, optional): Automatic or user (default) download. Defaults to False.
+            password (str, optional): The password for protected websites.
+            referrer (str, optional): The HTTP referrer.
+            user (str, optional): The user name for protected websites.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'automatic': automatic,
+            'password': password,
+            'referrer': referrer,
+            'user': user
+        }
+        return self._call_method('addDownload', args=[url], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def add_reading_list(self, record: Record = None, title: str = None, url: str = None) -> bool:
+        """Add record or URL to reading list.
+        
+        Args:
+            record (Record, optional): The record. Only documents are supported.
+            title (str, optional): The title of the webpage.
+            url (str, optional): The URL of the webpage.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'record': record,
+            'title': title,
+            'url': url
+        }
+        return self._call_method('addReadingList', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def add_row(self, specifier, cells: list = None) -> bool:
+        """Add new row to current sheet.
+        
+        Args:
+            specifier: The object for the command.
+            cells (list, optional): Cells of new row.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'cells': cells
+        }
+        return self._call_method('addRow', args=[specifier], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def check_file_integrity_of(self, database: Database) -> int:
+        """Check file integrity of database. Returns number of files having an invalid content hash.
+        
+        Args:
+            database (Database): The database to check.
+        
+        Returns:
+            int: Number of files having an invalid content hash.
+        """
+        return self._call_method('checkFileIntegrityOf', args=[], kwargs={'database': database})
+
+    def classify(self, record: Record, comparison: str = "data comparison", in_db: Database = None) -> list:
+        """Get a list of classification proposals.
+        
+        Args:
+            record (Record): The record to classify.
+            comparison (str, optional): The comparison to use (default is "data comparison").
+            in_db (Database, optional): The database. Uses all databases if not specified.
+        
+        Returns:
+            list: A list of classification proposals.
+        """
+        kwargs = {
+            'record': record,
+            'comparison': comparison,
+            'in': in_db
+        }
+        return self._call_method('classify', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def compare(self, comparison: str = "data comparison", content: str = None, record: Record = None, to: Database = None) -> list:
+        """Get a list of similar records, either by specifying a record or a content.
+        
+        Args:
+            comparison (str, optional): The comparison to use (default is "data comparison").
+            content (str, optional): The content to compare.
+            record (Record, optional): The record to compare.
+            to (Database, optional): The database. Uses all databases if not specified.
+        
+        Returns:
+            list: A list of similar records.
+        """
+        kwargs = {
+            'comparison': comparison,
+            'content': content,
+            'record': record,
+            'to': to
+        }
+        return self._call_method('compare', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def compress(self, database: Database, to: str) -> bool:
+        """Compress a database into a Zip archive.
+        
+        Args:
+            database (Database): The database to compress.
+            to (str): POSIX path of Zip archive.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('compress', args=[], kwargs={'database': database, 'to': to})
+
+    def consolidate(self, record: Record) -> bool:
+        """Move an external/indexed record (and its children) into the database.
+
+        Args:
+            record (Record): The record to consolidate.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('consolidate', args=[], kwargs={'record': record})
+
+    def convert(self, record: Record, in_group: Record = None, to: str = "simple") -> Record:
+        """Convert a record to plain or rich text, formatted note or HTML and create a new record afterwards.
+
+        Args:
+            record (Record): The record or a list of records to convert.
+            in_group (Record, optional): The destination group for the converted record. Parents of the record to convert are used if not specified.
+            to (str, optional): The desired format. Defaults to "simple".
+
+        Returns:
+            Record: The converted record.
+        """
+        kwargs = {
+            'record': record,
+            'in': in_group,
+            'to': to
+        }
+        return self._call_method('convert', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def convert_feed_to_html(self, text: str, base_url: str = None) -> str:
+        """Convert a RSS, RDF, or Atom feed to HTML.
+        
+        Args:
+            text (str): The source code of the feed.
+            base_url (str, optional): The URL of the feed.
+        
+        Returns:
+            str: The converted HTML text.
+        """
+        kwargs = {
+            'baseURL': base_url
+        }
+        return self._call_method('convertFeedToHTML', args=[text], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def create_database(self, text: str) -> Database:
+        """Create a new database.
+        
+        Args:
+            text (str): POSIX file path of database.
+        
+        Returns:
+            Database: The created database object.
+        """
+        return self._call_method('createDatabase', args=[text], kwargs={})
+
+    def create_formatted_note_from(self, text: str, agent: str = None, in_: Record = None, name: str = None, readability: bool = None, referrer: str = None, source: str = None) -> Record:
+        """Create a new formatted note from a web page.
+        
+        Args:
+            text (str): The URL to download.
+            agent (str, optional): The user agent.
+            in_ (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
+            name (str, optional): The name for the new record.
+            readability (bool, optional): Declutter page layout.
+            referrer (str, optional): The HTTP referrer.
+            source (str, optional): The HTML source.
+        
+        Returns:
+            Record: The new record created.
+        """
+        kwargs = {
+            'agent': agent,
+            'in': in_,
+            'name': name,
+            'readability': readability,
+            'referrer': referrer,
+            'source': source
+        }
+        return self._call_method('createFormattedNoteFrom', args=[text], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def create_location(self, path: str, database: Database = None) -> Record:
+        """Create a hierarchy of groups if necessary.
+
+        Args:
+            path (str): The hierarchy as a POSIX path (/ in names has to be replaced with \/, see location property).
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            Record: The created record.
+        """
+        return self._call_method('createLocation', [path], {
+            'in': database,
+        })
+
+    def create_markdown_from(self, url: str, agent: str = None, in_: Record = None, name: str = None, readability: bool = None, referrer: str = None) -> Record:
+        """Create a Markdown document from a web resource.
+
+        Args:
+            url (str): The URL to download.
+            agent (str, optional): The user agent.
+            in_ (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
+            name (str, optional): The name for the new record.
+            readability (bool, optional): Declutter page layout.
+            referrer (str, optional): The HTTP referrer.
+
+        Returns:
+            Record: The new record.
+        """
+        kwargs = {
+            'agent': agent,
+            'in': in_,
+            'name': name,
+            'readability': readability,
+            'referrer': referrer
+        }
+        return self._call_method('createMarkdownFrom', args=[url], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def create_pdf_document_from(self, url: str, agent: str = None, destination_group: Record = None, name: str = None, pagination: bool = None, readability: bool = None, referrer: str = None, width: int = None) -> Record:
+        """Create a new PDF document with or without pagination from a web resource.
+
+        Args:
+            url (str): The URL to download.
+            agent (str, optional): The user agent.
+            destination_group (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
+            name (str, optional): The name for the new record.
+            pagination (bool, optional): Paginate PDF document or not.
+            readability (bool, optional): Declutter page layout.
+            referrer (str, optional): The HTTP referrer.
+            width (int, optional): The preferred width for the PDF document in pixels.
+
+        Returns:
+            Record: The new PDF document record.
+        """
+        kwargs = {
+            'agent': agent,
+            'in': destination_group,
+            'name': name,
+            'pagination': pagination,
+            'readability': readability,
+            'referrer': referrer,
+            'width': width
+        }
+        return self._call_method('createPDFDocumentFrom', args=[url], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def create_record_with(self, properties: dict, in_: Optional['Record'] = None) -> Record:
+        """Create a new record.
+
+        Args:
+            record (dict): The properties of the record. Possible keys for record are 'name', 'type', 'comment', 'path', 'URL', 'creation date', 'modification date', 'date', 'plain text', 'rich text', 'source', 'data', 'content', 'columns', 'cells', 'thumbnail' and 'tags'.
+            in_ (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
+        Returns:
+            Record: The newly created record.
+        """
+        return self._call_method('createRecordWith', [properties], {'in': in_})
+
+    def create_thumbnail(self, for_record: Record) -> bool:
+        """Create or update existing thumbnail of a record. Thumbnailing is performed asynchronously in the background.
+        
+        Args:
+            for_record (Record): The record.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+
+        return self._call_method('createThumbnail', args=[], kwargs={'for': for_record})
+
+    def create_web_document_from(self, url: str, agent: str = None, in_record: Record = None, name: str = None, readability: bool = None, referrer: str = None) -> Record:
+        """Create a new record (picture, PDF, or web archive) from a web resource.
+
+        Args:
+            url (str): The URL to download.
+            agent (str, optional): The user agent.
+            in_record (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
+            name (str, optional): The name for the new record.
+            readability (bool, optional): Declutter page layout.
+            referrer (str, optional): The HTTP referrer.
+
+        Returns:
+            Record: The newly created record.
+        """
+        kwargs = {
+            'agent': agent,
+            'in': in_record,
+            'name': name,
+            'readability': readability,
+            'referrer': referrer
+        }
+        return self._call_method('createWebDocumentFrom', args=[url], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def deconsolidate(self, record: Record, to: str = None) -> bool:
+        """Move an internal/imported record (and its children) to the enclosing external folder in the filesystem. Creation/Modification dates, Spotlight comments and OpenMeta tags are immediately updated.
+        
+        Args:
+            record (Record): The record to deconsolidate.
+            to (str, optional): The POSIX path of the destination folder. Only supported by documents.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'record': record,
+            'to': to
+        }
+        return self._call_method('deconsolidate', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def delete(self, record: 'Record', in_: Optional['Record'] = None) -> bool:
+        """Delete all instances of a record from the database or one instance from the specified group.
+
+        Args:
+            record (Record): The record to delete.
+            in_ (Record, optional): The parent group of this instance. Deletes all instances of the record from the database if not specified.
+
+        Returns:
+            bool: `True` if the deletion was successful.
+        """
+        return self._call_method('delete', [], {'record': record, 'in': in_})
+
+    def delete_row_at(self, specifier, *, position: int) -> bool:
+        """Remove row at specified position from current sheet.
+        
+        Args:
+            specifier: The object for the command.
+            position (int): Position of the row (1...n).
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('deleteRowAt', args=[specifier], kwargs={'position': position})
 
     def open_tab_for(self, in_think_window: ThinkWindow = None, record: Record = None, referrer: str = None, url: str = None) -> Tab:
         """Open a new tab for the specified URL or record in a think window.
