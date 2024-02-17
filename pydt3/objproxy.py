@@ -82,7 +82,8 @@ class OSAObjArray(OSAObjProxy, Sequence[T]):
         return self._call_method('at', args=[index])
 
     def __iter__(self):
-        return iter(self())
+        for i in range(len(self)):
+            yield self[i]
 
 class DefaultOSAObjProxy(OSAObjProxy):
     def __getitem__(self, key: str):
