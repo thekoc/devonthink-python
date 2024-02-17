@@ -35,17 +35,16 @@ class Reminder(OSAObjProxy):
     @property
     def due_date(self) -> datetime.datetime:
         """Due date."""
-        return self._get_property('dueDate')
+        return self._call_method('dueDate')
 
     @due_date.setter
     def due_date(self, value: datetime.datetime):
-        # TODO: Implement this
-        raise NotImplementedError()
+        self._set_property('dueDate', value)
 
     @property
     def interval(self) -> int:
         """Interval of schedule (every n hours, days, weeks, months or years)"""
-        return self._get_property('interval')
+        return self._call_method('interval')
 
     @interval.setter
     def interval(self, value: int):
@@ -54,7 +53,7 @@ class Reminder(OSAObjProxy):
     @property
     def masc(self) -> int:
         """Bitmap specifying scheduled days of week/month or scheduled months of year."""
-        return self._get_property('masc')
+        return self._call_method('masc')
 
     @masc.setter
     def masc(self, value: int):

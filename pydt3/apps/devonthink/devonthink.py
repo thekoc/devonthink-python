@@ -43,23 +43,23 @@ class DEVONthink3(Application):
         return self._get_property('selectedRecords')
     
     @property
-    def think_windows(self) -> List[ThinkWindow]:
+    def think_windows(self) -> OSAObjArray[ThinkWindow]:
         return self._get_property('thinkWindows')
 
     @property
-    def viewer_windows(self) -> List[ViewerWindow]:
+    def viewer_windows(self) -> OSAObjArray[ViewerWindow]:
         return self._get_property('viewerWindows')
 
     # properties
     @property
     def bates_number(self) -> int:
         """Current bates number."""
-        return self._get_property('batesNumber')
+        return self._call_method('batesNumber')
 
     @property
     def cancelled_progress(self) -> bool:
         """Specifies if a process with visible progress indicator should be cancelled."""
-        return self._get_property('cancelledProgress')
+        return self._call_method('cancelledProgress')
 
     @property
     def content_record(self) -> Record:
@@ -79,7 +79,7 @@ class DEVONthink3(Application):
     @property
     def current_workspace(self) -> Optional[str]:
         """The name of the currently used workspace."""
-        return self._get_property('currentWorkspace')
+        return self._call_method('currentWorkspace')
 
     @property
     def inbox(self) -> Database:
@@ -99,7 +99,7 @@ class DEVONthink3(Application):
     @property
     def last_downloaded_response(self) -> Optional[Record]:
         """HTTP-Status, Last-Modified, Content-Type, Content-Length and Charset of last HTTP(S) response."""
-        return self._get_property('lastDownloadedResponse')
+        return self._call_method('lastDownloadedResponse')
 
     @property
     def preferred_import_destination(self) -> Record:
@@ -109,7 +109,7 @@ class DEVONthink3(Application):
     @property
     def reading_list(self) -> List[dict]:
         """The items of the reading list."""
-        return self._get_property('readingList', evaluated=True)
+        return self._call_method('readingList')
 
     @property
     def selection(self) -> list:
@@ -128,7 +128,7 @@ class DEVONthink3(Application):
     @property
     def workspaces(self) -> List[str]:
         """The names of all available workspaces."""
-        return self._get_property('workspaces')
+        return self._call_method('workspaces')
     
     # methods
     ## standard additions

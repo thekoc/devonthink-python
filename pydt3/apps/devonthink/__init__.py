@@ -7,6 +7,7 @@ from .item import Item
 from .record import Record
 from .reminder import Reminder
 from .smartgroup import SmartGroup
+from .tab import Tab
 from .text import Text
 from .windows import (ThinkWindow, DocumentWindow, ViewerWindow)
 
@@ -18,7 +19,8 @@ HelperScript.register_class_map(app_name='DEVONthink 3', class_map={
     'reminder': Reminder,
     'text': Text,
     'smartGroup': SmartGroup,
+    'tab': Tab,
     'thinkWindow': ThinkWindow,
     'documentWindow': DocumentWindow,
-    'viewerWindow': ViewerWindow
+    'viewerWindow': ViewerWindow,
 })

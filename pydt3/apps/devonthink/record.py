@@ -1,7 +1,7 @@
 
 import datetime
 
-from typing import Optional, Any, TYPE_CHECKING
+from typing import Optional, List, Any, TYPE_CHECKING
 
 from .devonthink import DEVONthink3
 from ...osascript import OSAScript
@@ -12,8 +12,6 @@ if TYPE_CHECKING:
     from .database import Database
     from .reminder import Reminder
     from .text import Text
-
-
 
 class CustomMetaData:
 
@@ -105,14 +103,14 @@ class Record(OSAObjProxy):
         self._set_property('aliases', value)
 
     @property
-    def all_document_dates(self) -> Optional[OSAObjArray[datetime.datetime]]:
+    def all_document_dates(self) -> Optional[List[datetime.datetime]]:
         """All dates extracted from text of document, e.g. a scan."""
         return self._call_method('allDocumentDates')
 
     @property
     def altitude(self) -> float:
         """The altitude in metres of a record."""
-        return self._get_property('altitude')
+        return self._call_method('altitude')
 
     @altitude.setter
     def altitude(self, value: float):
@@ -121,7 +119,7 @@ class Record(OSAObjProxy):
     @property
     def annotation(self) -> Optional['Record']:
         """Annotation of a record. Only plain & rich text and Markdown documents are supported."""
-        return self._get_property('annotation')
+        return self._call_method('annotation')
 
     @annotation.setter
     def annotation(self, value: 'Record'):
@@ -130,7 +128,7 @@ class Record(OSAObjProxy):
     @property
     def annotation_count(self) -> int:
         """The number of annotations. Currently only supported for PDF documents."""
-        return self._get_property('annotationCount')
+        return self._call_method('annotationCount')
 
     @property
     def attached_script(self) -> str:
@@ -144,12 +142,12 @@ class Record(OSAObjProxy):
     @property
     def attachment_count(self) -> int:
         """The number of attachments. Currently only supported for RTFD documents and emails."""
-        return self._get_property('attachmentCount')
+        return self._call_method('attachmentCount')
 
     @property
     def bates_number(self) -> int:
         """Bates number."""
-        return self._get_property('batesNumber')
+        return self._call_method('batesNumber')
 
     @bates_number.setter
     def bates_number(self, value: int):
@@ -164,22 +162,21 @@ class Record(OSAObjProxy):
     @property
     def character_count(self) -> int:
         """The character count of a record."""
-        return self._get_property('characterCount')
+        return self._call_method('characterCount')
 
     @property
-    def color(self) -> Optional[OSAObjArray[float]]:
+    def color(self) -> Optional[List[float]]:
         """The color of a record. Currently only supported by tags."""
-        return self._get_property('color')
+        return self._call_method('color')
 
     @color.setter
     def color(self, value: OSAObjArray[float]):
-        "There seems to be a bug when setting the color "
-        raise NotImplementedError()
+        self._set_property('color', value)
 
     @property
-    def columns(self) -> Optional[OSAObjArray[str]]:
+    def columns(self) -> Optional[List[str]]:
         """The column names of a sheet.""" 
-        return self._get_property('columns')
+        return self._call_method('columns')
 
     @property
     def comment(self) -> str:
@@ -193,12 +190,12 @@ class Record(OSAObjProxy):
     @property
     def content_hash(self) -> Optional[str]:
         """Stored SHA1 hash of files and document packages."""
-        return self._get_property('contentHash')
+        return self._call_method('contentHash')
 
     @property
     def creation_date(self) -> datetime.datetime:
         """The creation date of a record."""
-        return self._get_property('creationDate')
+        return self._call_method('creationDate')
 
     @property
     def custom_meta_data(self) -> Optional[CustomMetaData]:
@@ -218,27 +215,27 @@ class Record(OSAObjProxy):
     @property
     def date(self) -> datetime.datetime:
         """The (creation/modification) date of a record."""
-        return self._get_property('date')
+        return self._call_method('date')
 
     @property
     def digital_object_identifier(self) -> Optional[str]:
         """Digital object identifier (DOI) extracted from text of document, e.g. a scanned receipt."""
-        return self._get_property('digitalObjectIdentifier')
+        return self._call_method('digitalObjectIdentifier')
 
     @property
-    def dimensions(self) -> OSAObjArray[int]:
+    def dimensions(self) -> List[int]:
         """The width and height of an image or PDF document in pixels."""
-        return self._get_property('dimensions')
+        return self._call_method('dimensions')
 
     @property
     def document_amount(self) -> Optional[str]:
         """Amount extracted from text of document, e.g. a scanned receipt."""
-        return self._get_property('documentAmount')
+        return self._call_method('documentAmount')
 
     @property
     def document_date(self) -> Optional[datetime.datetime]:
         """First date extracted from text of document, e.g. a scan."""
-        return self._get_property('documentDate')
+        return self._call_method('documentDate')
 
     @property
     def document_name(self) -> str:
@@ -248,7 +245,7 @@ class Record(OSAObjProxy):
     @property
     def dpi(self) -> int:
         """The resultion of an image in dpi."""
-        return self._get_property('dpi')
+        return self._call_method('dpi')
 
     @property
     def duplicates(self) -> OSAObjArray['Record']:
@@ -259,17 +256,17 @@ class Record(OSAObjProxy):
     @property
     def duration(self) -> float:
         """The duration of audio and video files."""
-        return self._get_property('duration')
+        return self._call_method('duration')
 
     @property
     def encrypted(self) -> bool:
         """Specifies if a document is encrypted or not. Currently only supported by PDF documents."""
-        return self._get_property('encrypted')
+        return self._call_method('encrypted')
 
     @property
     def exclude_from_classification(self) -> bool:
         """Exclude group or record from classifying."""
-        return self._get_property('excludeFromClassification')
+        return self._call_method('excludeFromClassification')
 
     @exclude_from_classification.setter
     def exclude_from_classification(self, value: bool):
@@ -278,7 +275,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_search(self) -> bool:
         """Exclude group or record from searching."""
-        return self._get_property('excludeFromSearch')
+        return self._call_method('excludeFromSearch')
 
     @exclude_from_search.setter
     def exclude_from_search(self, value: bool):
@@ -287,7 +284,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_see_also(self) -> bool:
         """Exclude record from see also."""
-        return self._get_property('excludeFromSeeAlso')
+        return self._call_method('excludeFromSeeAlso')
 
     @exclude_from_see_also.setter
     def exclude_from_see_also(self, value: bool):
@@ -296,7 +293,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_tagging(self) -> bool:
         """Exclude group from tagging."""
-        return self._get_property('excludeFromTagging')
+        return self._call_method('excludeFromTagging')
 
     @exclude_from_tagging.setter
     def exclude_from_tagging(self, value: bool):
@@ -305,7 +302,7 @@ class Record(OSAObjProxy):
     @property
     def exclude_from_wiki_linking(self) -> bool:
         """Exclude record from automatic Wiki linking."""
-        return self._get_property('excludeFromWikiLinking')
+        return self._call_method('excludeFromWikiLinking')
 
     @exclude_from_wiki_linking.setter
     def exclude_from_wiki_linking(self, value: bool):
@@ -319,23 +316,22 @@ class Record(OSAObjProxy):
     @property
     def geolocation(self) -> Optional[str]:
         """The human readable geogr. place of a record."""
-        return self._get_property('geolocation')
+        return self._call_method('geolocation')
 
     @property
     def height(self) -> int:
         """The height of an image or PDF document in pixels."""
-        return self._get_property('height')
+        return self._call_method('height')
 
     @property
     def id(self) -> int:
         """The scripting identifier of a record. Optimizing or closing a database might modify this identifier."""
-        return self._get_property('id')
+        return self._call_method('id')
 
-    # properties
     @property
-    def image(self):
+    def image(self) -> Any:
         """The image or PDF document of a record. Setting supports both raw data and strings containing paths or URLs."""
-        return self._get_property('image')
+        return self._call_method('image')
 
     @image.setter
     def image(self, value):
@@ -344,12 +340,12 @@ class Record(OSAObjProxy):
     @property
     def indexed(self) -> bool:
         """Indexed or imported record."""
-        return self._get_property('indexed')
+        return self._call_method('indexed')
 
     @property
     def interval(self) -> float:
         """Refresh interval of a feed. Currently overriden by preferences."""
-        return self._get_property('interval')
+        return self._call_method('interval')
 
     @interval.setter
     def interval(self, value: float):
@@ -358,20 +354,21 @@ class Record(OSAObjProxy):
     @property
     def kind(self) -> Optional[str]:
         """The human readable and localized kind of a record. WARNING: Don't use this to check the type of a record, otherwise your script might fail depending on the version and the localization."""
-        return self._get_property('kind')
+        return self._call_method('kind')
 
     @property
     def label(self) -> int:
         """Index of label (0-7) of a record."""
-        return self._get_property('label')
+        return self._call_method('label')
 
     @label.setter
     def label(self, value: int):
         self._set_property('label', value)
+
     @property
     def latitude(self) -> float:
         """The latitude in degrees of a record."""
-        return self._get_property('latitude')
+        return self._call_method('latitude')
 
     @latitude.setter
     def latitude(self, value: float):
@@ -391,7 +388,7 @@ class Record(OSAObjProxy):
     @property
     def locking(self) -> bool:
         """The locking of a record."""
-        return self._get_property('locking')
+        return self._call_method('locking')
 
     @locking.setter
     def locking(self, value: bool):
@@ -400,7 +397,7 @@ class Record(OSAObjProxy):
     @property
     def longitude(self) -> float:
         """The longitude in degrees of a record."""
-        return self._get_property('longitude')
+        return self._call_method('longitude')
 
     @longitude.setter
     def longitude(self, value: float):
@@ -411,17 +408,17 @@ class Record(OSAObjProxy):
         """Document metadata (e.g. of PDF or RTF) of a record as a dictionary containing key-value pairs. 
         Possible keys are currently kMDItemTitle, kMDItemHeadline, kMDItemSubject, kMDItemDescription, 
         kMDItemCopyright, kMDItemComment, kMDItemURL, kMDItemKeywords, kM"""
-        return self._get_property('metaData')
+        return self._call_method('metaData')
 
     @property
     def mime_type(self) -> Optional[str]:
         """The (proposed) MIME type of a record."""
-        return self._get_property('mimeType')
+        return self._call_method('mimeType')
 
     @property
     def modification_date(self) -> datetime.datetime:
         """The modification date of a record."""
-        return self._get_property('modificationDate')
+        return self._call_method('modificationDate')
 
     @modification_date.setter
     def modification_date(self, value: datetime.datetime):
@@ -450,17 +447,17 @@ class Record(OSAObjProxy):
     @property
     def newest_document_date(self) -> Optional[datetime.datetime]:
         """Newest date extracted from text of document, e.g. a scan."""
-        return self._get_property('newestDocumentDate')
+        return self._call_method('newestDocumentDate')
 
     @property
     def number_of_duplicates(self) -> int:
         """The number of duplicates of a record."""
-        return self._get_property('numberOfDuplicates')
+        return self._call_method('numberOfDuplicates')
 
     @property
     def number_of_hits(self) -> int:
         """The number of hits of a record."""
-        return self._get_property('numberOfHits')
+        return self._call_method('numberOfHits')
 
     @number_of_hits.setter
     def number_of_hits(self, value: int):
@@ -469,27 +466,27 @@ class Record(OSAObjProxy):
     @property
     def number_of_replicants(self) -> int:
         """The number of replicants of a record."""
-        return self._get_property('numberOfReplicants')
+        return self._call_method('numberOfReplicants')
 
     @property
     def oldest_document_date(self) -> Optional[datetime.datetime]:
         """Oldest date extracted from text of document, e.g. a scan."""
-        return self._get_property('oldestDocumentDate')
+        return self._call_method('oldestDocumentDate')
 
     @property
     def opening_date(self) -> Optional[datetime.datetime]:
         """Date when a content was opened the last time or when a feed was refreshed the last time."""
-        return self._get_property('openingDate')
+        return self._call_method('openingDate')
 
     @property
     def page_count(self) -> int:
         """The page count of a record. Currently only supported by PDF documents."""
-        return self._get_property('pageCount')
+        return self._call_method('pageCount')
 
     @property
     def paginated_pdf(self):
         """A printed/converted PDF of the record."""
-        return self._get_property('paginatedPDF')
+        return self._call_method('paginatedPDF')
 
     @property
     def path(self) -> str:
@@ -503,7 +500,7 @@ class Record(OSAObjProxy):
     @property
     def pending(self) -> bool:
         """Flag whether the (latest) contents of a record haven't been downloaded from a sync location yet."""
-        return self._get_property('pending')
+        return self._call_method('pending')
 
     @property
     def plain_text(self) -> str:
@@ -522,7 +519,7 @@ class Record(OSAObjProxy):
     @property
     def rating(self) -> int:
         """Rating (0-5) of a record."""
-        return self._get_property('rating')
+        return self._call_method('rating')
 
     @rating.setter
     def rating(self, value: int):
@@ -539,28 +536,31 @@ class Record(OSAObjProxy):
     @property
     def reminder(self) -> Optional['Reminder']:
         """Reminder of a record."""
-        return self._get_property('reminder')
+        return self._call_method('reminder')
 
     @reminder.setter
     def reminder(self, value: 'Reminder'):
         self._set_property('reminder', value)
 
     @property
-    def rich_text(self) -> Optional['Text']:
+    def rich_text(self) -> 'Text':
         """The rich text of a record (see text suite). 
         Use the 'text' relationship introduced by version 3.0 instead,
         especially for changing the contents/styles of RTF(D) documents."""
-        return self._get_property('richText')
+
+        text = self._get_property('richText')
+        if text.class_name == 'unknown':
+            return None
 
     @property
     def score(self) -> float:
         """The score of the last comparison, classification or search (value between 0.0 and 1.0) or undefined otherwise."""
-        return self._get_property('score')
+        return self._call_method('score')
 
     @property
     def size(self) -> int:
         """The size of a record in bytes."""
-        return self._get_property('size')
+        return self._call_method('size')
 
     @property
     def source(self) -> str:
@@ -570,7 +570,7 @@ class Record(OSAObjProxy):
     @property
     def state(self) -> bool:
         """The state/flag of a record."""
-        return self._get_property('state')
+        return self._call_method('state')
 
     @state.setter
     def state(self, value: bool):
@@ -598,7 +598,7 @@ class Record(OSAObjProxy):
     @property
     def thumbnail(self) -> Optional[str]:
         """The thumbnail of a record. Setting supports both raw data and strings containing paths or URLs."""
-        return self._get_property('thumbnail')
+        return self._call_method('thumbnail')
 
     @thumbnail.setter
     def thumbnail(self, value: any):
@@ -615,7 +615,7 @@ class Record(OSAObjProxy):
     @property
     def unread(self) -> bool:
         """The unread flag of a record."""
-        return self._get_property('unread')
+        return self._call_method('unread')
 
     @unread.setter
     def unread(self, value: bool):
@@ -634,17 +634,17 @@ class Record(OSAObjProxy):
     @property
     def web_archive(self):
         """The web archive of a record if available or the record converted to web archive if possible."""
-        return self._get_property('webArchive')
+        return self._call_method('webArchive')
 
     @property
     def width(self) -> int:
         """The width of an image or PDF document in pixels."""
-        return self._get_property('width')
+        return self._call_method('width')
 
     @property
     def word_count(self) -> int:
         """The word count of a record."""
-        return self._get_property('wordCount')
+        return self._call_method('wordCount')
     
     def __repr__(self):
         return f'<Record: {self.name}>'

@@ -124,39 +124,46 @@ class JsonTranslator {
         if (ObjectSpecifier.hasInstance(obj)) {
             let guessClass = Util.guessClassOfSpecifier(obj);
             if (guessClass === undefined) {
+                return {
+                    type: 'reference',
+                    objId: this.objectPoolManager.getId(obj),
+                    app: Util.getAssociatedApplicationName(obj),
+                    className: 'unknown'
+                }
+                // We don't do implicit evaluation of specifiers anymore.
+                
                 // The object is a specifier but we don't know its class.
                 // This could mean that the object is a reference to a primitive value.
                 // eg. a `number`, `bool` or `string`.
                 // In that case, the best we can do is to return the evaluated value.
-                try {
-                    let evaluated = obj();
-                    if (Util.isJsonNode(evaluated)) {
-                        return {
-                            type: 'plain',
-                            data: evaluated
-                        };
-                    } else if (evaluated instanceof Date) {
-                        return {
-                            type: 'date',
-                            data: evaluated.getTime() / 1000
-                        }
-                    } else {
-                        return {
-                            type: 'reference',
-                            objId: this.objectPoolManager.getId(obj),
-                            app: Util.getAssociatedApplicationName(obj),
-                            className: 'unknown'
-                        }
-                    }
-                } catch (error) {
-                    return {
-                        type: 'reference',
-                        objId: this.objectPoolManager.getId(obj),
-                        app: Util.getAssociatedApplicationName(obj),
-                        className: 'unknown'
-                    }
-                }
-
+                // try {
+                //     let evaluated = obj();
+                //     if (Util.isJsonNode(evaluated)) {
+                //         return {
+                //             type: 'plain',
+                //             data: evaluated
+                //         };
+                //     } else if (evaluated instanceof Date) {
+                //         return {
+                //             type: 'date',
+                //             data: evaluated.getTime() / 1000
+                //         }
+                //     } else {
+                //         return {
+                //             type: 'reference',
+                //             objId: this.objectPoolManager.getId(obj),
+                //             app: Util.getAssociatedApplicationName(obj),
+                //             className: 'unknown'
+                //         }
+                //     }
+                // } catch (error) {
+                //     return {
+                //         type: 'reference',
+                //         objId: this.objectPoolManager.getId(obj),
+                //         app: Util.getAssociatedApplicationName(obj),
+                //         className: 'unknown'
+                //     }
+                // }
             }
 
             if (guessClass === 'application') {
@@ -310,13 +317,10 @@ function _evalAppleScriptCodeSnippet({source}) {
 }
 evalAppleScriptCodeSnippet = jsonTranslator.strIOFuncWrapper(_evalAppleScriptCodeSnippet);
 
-function _getProperty({obj, name, evaluated = false}) {
+function _getProperty({obj, name}) {
     let value = obj[name];
     if (Util.isMethod(value)) {
         value = value.bind(obj);
-    }
-    if (evaluated) {
-        value = value();
     }
     return value;
 }

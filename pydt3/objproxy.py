@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
 class OSAObjProxy:
     def __init__(self, helper_script: Optional[HelperScript] = None, obj_id: Optional[int] = None, class_name: Optional[str] = None):
         self._helper_script: Optional[HelperScript] = helper_script
@@ -53,8 +52,8 @@ class OSAObjProxy:
     def _set_property(self, name: str, value):
         return self._helper_script.set_properties(self, {name: value})
 
-    def _get_property(self, name: str, evaluated: bool = False):
-        return self._helper_script.get_property(self, name, evaluated)
+    def _get_property(self, name: str):
+        return self._helper_script.get_property(self, name)
     
     def _call_method(self, name: str, args = None, kwargs: dict = None):
         return self._helper_script.call_method(self, name, args, kwargs)

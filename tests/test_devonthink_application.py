@@ -17,7 +17,6 @@ class TestDEVONhinkApplication(unittest.TestCase):
         self.dbs = [self.app.ext.db_by_name('blue-book')]
 
     def test_id(self):
-        print(self.app.id)
         self.assertTrue(self.app.id == 'com.devon-technologies.think3')
         
     def test_name(self):

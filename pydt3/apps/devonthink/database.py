@@ -13,20 +13,21 @@ class Database(OSAObjProxy):
         return self._get_property('contents')
 
     @property
-    def parents(self) -> List['Record']:
+    def parents(self) -> OSAObjArray['Record']:
         """The parents of the database."""
         return self._get_property('parents')
 
     @property
-    def records(self) -> List['Record']:
+    def records(self) -> OSAObjArray['Record']:
         """The records contained in the database."""
         return self._get_property('records')
 
     @property
-    def smart_groups(self) -> List['SmartGroup']:
+    def smart_groups(self) -> OSAObjArray['SmartGroup']:
         """The smart groups contained in the database."""
         return self._get_property('smartGroups')
 
+    # TODO: tag_groups
     # @property
     # def tag_groups(self) -> List[TagGroup]:
     #     """The tag groups contained in the database."""
@@ -55,12 +56,12 @@ class Database(OSAObjProxy):
     @property
     def encrypted(self) -> bool:
         """Specifies if a database is encrypted or not."""
-        return self._get_property('encrypted')
+        return self._call_method('encrypted')
 
     @property
     def id(self) -> int:
         """The scripting identifier of a database."""
-        return self._get_property('id')
+        return self._call_method('id')
 
     @property
     def incoming_group(self) -> 'Record':
@@ -84,7 +85,7 @@ class Database(OSAObjProxy):
     @property
     def read_only(self) -> bool:
         """Specifies if a database is read-only and can't be modified."""
-        return self._get_property('readOnly')
+        return self._call_method('readOnly')
 
     @property
     def root(self) -> 'Record':
