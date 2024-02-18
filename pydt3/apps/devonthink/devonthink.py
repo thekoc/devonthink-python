@@ -170,138 +170,6 @@ class DEVONthink3(Application):
     
     
     # DEVONthink suit
-    def show_progress_indicator(self, title: str, cancel_button: bool, steps: int) -> bool:
-        """Show a progress indicator or update an already visible indicator. You have to ensure that the indicator is hidden again via 'hide progress indicator' when the script ends or if an error occurs.
-        
-        Args:
-            title (str): The title of the progress.
-            cancel_button (bool):  Display a button to cancel the process.
-            steps (int):  The number of steps of the progress or a negative value for an indeterminate number.
-        """
-        return self._call_method('showProgressIndicator', [title], {
-            'cancelButton': cancel_button,
-            'steps': steps,
-        })
-    
-    def hide_progress_indicator(self) -> bool:
-        """Hide a visible progress indicator."""
-        return self._call_method('hideProgressIndicator')
-        
-    def step_progress_indicator(self, title) -> bool:
-        """Go to next step of a progress."""
-        return self._call_method('stepProgressIndicator', [title])
-
-    def search(self, text: str, comparision: str = 'no case', excludeSubgroups: bool = False) -> OSAObjArray[Record]:
-        """Search for records in specified group or all databases.
-
-        Args:
-            text (str): The search string.
-            comparision (str, optional):  The comparison to use (default `'no case'`). One of fuzzy/‌no case/‌no umlauts.
-            excludeSubgroups (bool, optional): Don't search in subgroups of the specified group. (default `false`).
-
-        Returns:
-            List[Record]: The list of records matching the search string.
-        """
-        return self._call_method('search', [text], {
-            'comparision': comparision,
-            'excludeSubgroups': excludeSubgroups,
-        })
-
-    def import_(self, file_path: str, source_app: str = None, record_name: str = None, placeholders: dict = None, to: Record = None) -> Record:
-        """Import a file or folder (including its subfolders).
-
-        Args:
-            file_path (str): The POSIX path of the file or folder.
-            source_app (str, optional): The name of the source application. Default is None.
-            record_name (str, optional): The name for the imported record. Default is None.
-            placeholders (dict, optional): Optional placeholders as key-value-pairs for text, RTF/RTFD & HTML/XML templates and filenames. Default is None.
-            to (Group, optional): he destination group. Uses incoming group or group selector if not specified. Default is None.
-
-        Returns:
-            Record: The imported record.
-        """
-        return self._call_method('import', [file_path], {
-            'from': source_app,
-            'name': record_name,
-            'placeholders': placeholders,
-            'to': to,
-        })
-
-    def indicate(self, text: str, to_: Optional[Record] = None, file_type: Optional[int] = None) -> Record:
-        """Indicate ('index') a file or folder (including its subfolders). If no type is specified or the type is 'all', then links to unknown file types are created too.
-
-        Args:
-            text (str): The POSIX path of the file or folder.
-            dest (Record, optional): The destination group. Uses incoming group or group selector if not specified.
-            file_type (int, optional): Obsolete.
-
-        Returns:
-            Record: The record of the indicated file or folder.
-        """
-        return self._call_method('indicate', text, {
-            'to': to_,
-            'fileType': file_type,
-        })
-
-    def index(self, text: str, to_: Optional[Record] = None, file_type: Optional[int] = None) -> Record:
-        """Alias for `indicate`."""
-        return self.indicate(text, to_, file_type)
-
-    def open_database(self, file_path: str) -> Database:
-        """Open an existing database.
-
-        Args:
-            file_path (str): The POSIX file path of the database.
-
-        Returns:
-            Database: The opened database.
-        """
-        return self._call_method('open database', [file_path])
-    
-    def create_database(self, path: str) -> Database:
-        """Create a new database.
-
-        Args:
-            text (str): POSIX file path of database.
-
-        Returns:
-            Database: The new database object.
-        """
-        return self._call_method('createDatabase', [path])
-
-    def move(self, record: Union[Record, List[Record]], to: Record, from_: Record = None) -> Union[Record, List[Record]]:
-        """Move all instances of a record to a different group. Specify the "from" group to to move a single instance to a different group.
-
-        Args:
-            record (Union[Record, List[Record]]): The record or a list of records to move.
-            to (Record): The destination group which doesn't have to be in the same database.
-            from_ (Record, optional): The source group. Only applicable if record and destination group are in the same database.
-
-        Returns:
-            Union[Record, List[Record]]: The moved record or list of records.
-        """
-        return self._call_method('move', [], {
-            'record': record,
-            'to': to,
-            'from': from_,
-        })
-
-
-    def replicate(self, record: Record, to: Record) -> Record:
-        """Replicate a record.
-
-        Args:
-            record (Record): The record to replicate.
-            to (Record): The destination group which must be in the same database.
-
-        Returns:
-            Record: The replicated record.
-        """
-        return self._call_method('replicate', [], {
-            'record': record,
-            'to': to,
-        })
-
     def add_custom_meta_data(self, value, for_: str, to: Record):
         """Add user-defined metadata to a record. Setting a value for an unknown key automatically adds a definition to Preferences > Data.
 
@@ -1140,44 +1008,304 @@ class DEVONthink3(Application):
         """
         return self._call_method('getRecordAt', [text], {'in': database})
 
-    def get_record_with_uuid(self, text: str, database: Optional[Database] = None) -> Record:
+    def get_record_with_id(self, identifier: int, database: Database = None) -> Record:
+        """Get record with the specified id.
+
+        Args:
+            identifier (int): The scripting identifier.
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            Record: The record with the specified id.
+        """
+        kwargs = {
+            'in': database
+        }
+        return self._call_method('getRecordWithId', args=[identifier], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def get_record_with_uuid(self, uuid: str, database: Database = None) -> Record:
         """Get record with the specified uuid or item link.
 
         Args:
-            text (str): The unique identifier or item link.
+            uuid (str): The unique identifier or item link.
             database (Database, optional): The database. Uses all databases if not specified.
 
         Returns:
             Record: The record with the specified uuid or item link.
         """
-        return self._call_method('getRecordWithUuid', [text], {'in': database})
+        kwargs = {
+            'in': database
+        }
+        return self._call_method('getRecordWithUuid', args=[uuid], kwargs={k: v for k, v in kwargs.items() if v is not None})
 
+    def get_rich_text_of(self, source_code: str, base_url: str = None) -> str:
+        """Get the rich text of an HTML page.
 
+        Args:
+            source_code (str): The source code of the HTML page.
+            base_url (str, optional): The URL of the HTML page.
 
-    def open_tab_for(self, in_think_window: ThinkWindow = None, record: Record = None, referrer: str = None, url: str = None) -> 'Tab':
+        Returns:
+            str: The rich text of the HTML page.
+        """
+        kwargs = {
+            'baseURL': base_url
+        }
+        return self._call_method('getRichTextOf', args=[source_code], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def get_text_of(self, source_code: str) -> str:
+        """Get the text of an HTML page.
+
+        Args:
+            source_code (str): The source code of the HTML page.
+
+        Returns:
+            str: The text of the HTML page.
+        """
+        return self._call_method('getTextOf', args=[source_code], kwargs={})
+
+    def get_title_of(self, source_code: str) -> str:
+        """Get the title of an HTML page.
+
+        Args:
+            source_code (str): The source code of the HTML page.
+
+        Returns:
+            str: The title of the HTML page.
+        """
+        return self._call_method('getTitleOf', args=[source_code], kwargs={})
+
+    def hide_progress_indicator(self) -> bool:
+        """Hide a visible progress indicator."""
+        return self._call_method('hideProgressIndicator')
+        
+    def import_(self, path: str, from_: str = None, name: str = None, placeholders: Record = None, to: Record = None, type: int = None) -> Record:
+        """Import a file or folder (including its subfolders).
+
+        Args:
+            path (str): The POSIX path of the file or folder.
+            from_ (str, optional): The name of the source application.
+            name (str, optional): The name for the imported record.
+            placeholders (Record, optional): Optional placeholders as key-value-pairs for text, RTF/RTFD & HTML/XML templates and filenames. Note: The standard placeholders of .dtTemplate packages are also supported if this parameter is specified.
+            to (Record, optional): The destination group. Uses incoming group or group selector if not specified.
+            type (int, optional): Obsolete.
+
+        Returns:
+            Record: The imported record.
+        """
+        kwargs = {
+            'from': from_,
+            'name': name,
+            'placeholders': placeholders,
+            'to': to,
+            'type': type
+        }
+        return self._call_method('import', args=[path], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def import_template(self, path: str, to: Record = None) -> Record:
+        """Import a template. Note: Template scripts are not supported.
+
+        Args:
+            path (str): The POSIX path of the template.
+            to (Record, optional): The destination group. Uses incoming group or group selector if not specified.
+
+        Returns:
+            Record: The imported template.
+        """
+        kwargs = {
+            'to': to
+        }
+        return self._call_method('importTemplate', args=[path], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def indicate(self, path: str, to: Record = None, type: int = None) -> Record:
+        """Indicate ('index') a file or folder (including its subfolders).
+
+        Args:
+            path (str): The POSIX path of the file or folder.
+            to (Record, optional): The destination group. Uses incoming group or group selector if not specified.
+            type (int, optional): Obsolete.
+
+        Returns:
+            Record: The indicated record.
+        """
+        kwargs = {
+            'to': to,
+            'type': type
+        }
+        return self._call_method('indicate', args=[path], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def load_workspace(self, name: str) -> bool:
+        """Load a workspace.
+
+        Args:
+            name (str): The name of the workspace.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('loadWorkspace', args=[name])
+
+    def log_message(self, text: str = None, info: str = None, record: Record = None) -> bool:
+        """Log info for a record, file or action to the Window > Log panel.
+
+        Args:
+            text (str, optional): The optional POSIX path or action. Not necessary for records.
+            info (str, optional): Additional information. Required for records.
+            record (Record, optional): The record.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        args = [text] if text is not None else []
+        kwargs = {
+            'info': info,
+            'record': record
+        }
+        return self._call_method('logMessage', args=args, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def lookup_records_with_comment(self, comment: str, database: Database = None) -> list:
+        """Lookup records with specified comment.
+
+        Args:
+            comment (str): The comment.
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            list: The list of records.
+        """
+        kwargs = {
+            'in': database
+        }
+        return self._call_method('lookupRecordsWithComment', args=[comment], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def lookup_records_with_file(self, filename: str, database: Database = None) -> list:
+        """Lookup records whose last path component is the specified file.
+
+        Args:
+            filename (str): The filename.
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            list: The list of records.
+        """
+        kwargs = {
+            'in': database
+        }
+        return self._call_method('lookupRecordsWithFile', args=[filename], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def lookup_records_with_path(self, path: str, database: Database = None) -> list:
+        """Lookup records with specified path.
+
+        Args:
+            path (str): The path.
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            list: The list of records.
+        """
+        kwargs = {
+            'in': database
+        }
+        return self._call_method('lookupRecordsWithPath', args=[path], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def lookup_records_with_tags(self, tags: list, any: bool = False, database: Database = None) -> list:
+        """Lookup records with all or any of the specified tags.
+
+        Args:
+            tags (list): The tags.
+            any (bool, optional): Lookup any or all (default) tags.
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            list: The list of records.
+        """
+        kwargs = {
+            'any': any,
+            'in': database
+        }
+        return self._call_method('lookupRecordsWithTags', args=[tags], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def lookup_records_with_url(self, url: str, database: Database = None) -> list:
+        """Lookup records with specified URL.
+
+        Args:
+            url (str): The URL (or path).
+            database (Database, optional): The database. Uses current database if not specified.
+
+        Returns:
+            list: The list of records.
+        """
+        kwargs = {
+            'in': database
+        }
+        return self._call_method('lookupRecordsWithURL', args=[url], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def merge(self, records: List[Record], destination: Record = None) -> Record:
+        """Merge either a list of records as an RTF(D)/a PDF document or merge a list of not indexed groups/tags.
+
+        Args:
+            records (list): The records to merge.
+            destination (Record, optional): The destination group for the merged record. The root of the database is used if not specified.
+
+        Returns:
+            Record: The merged record.
+        """
+        kwargs = {
+            'record': records,
+            'in': destination
+        }
+        return self._call_method('merge', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def move(self, record: Record, to: Record, from_group: Record = None) -> Record:
+        """Move all instances of a record to a different group. Specify the "from" group to move a single instance to a different group.
+
+        Args:
+            record (Record): The record or a list of records to move.
+            to (Record): The destination group which doesn't have to be in the same database.
+            from_group (Record, optional): The source group. Only applicable if record and destination group are in the same database.
+
+        Returns:
+            Record: The record after the move.
+        """
+        kwargs = {
+            'record': record,
+            'to': to,
+            'from': from_group
+        }
+        return self._call_method('move', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def open_database(self, file_path: str) -> Database:
+        """Open an existing database.
+
+        Args:
+            file_path (str): The POSIX file path of the database.
+
+        Returns:
+            Database: The opened database.
+        """
+        return self._call_method('open database', [file_path])
+
+    def open_tab_for(self, think_window: ThinkWindow = None, record: Record = None, referrer: str = None, url: str = None) -> Tab:
         """Open a new tab for the specified URL or record in a think window.
 
         Args:
-            in_think_window (ThinkWindow, optional): The think window that should open a new tab. A new window is used otherwise.
+            think_window (ThinkWindow, optional): The optional think window that should open a new tab. A new window is used otherwise.
             record (Record, optional): The record to open.
             referrer (str, optional): The HTTP referrer.
             url (str, optional): The URL to open.
 
         Returns:
-            Tab: The newly opened tab.
+            Tab: The opened tab.
         """
-        kwargs = {}
-        if in_think_window is not None:
-            kwargs['in'] = in_think_window
-        if record is not None:
-            kwargs['record'] = record
-        if referrer is not None:
-            kwargs['referrer'] = referrer
-        if url is not None:
-            kwargs['url'] = url
-        return self._call_method('openTabFor', args=None, kwargs=kwargs)
+        kwargs = {
+            'in': think_window,
+            'record': record,
+            'referrer': referrer,
+            'url': url
+        }
+        return self._call_method('openTabFor', kwargs={k: v for k, v in kwargs.items() if v is not None})
 
-    def open_window_for(self, record: Record, force: bool = False) -> ThinkWindow:
+    def open_window_for(self, record: Record, force: bool = None) -> ThinkWindow:
         """Open a (new) viewer or document window for the specified record (use the 'close' command to close a window). Only recommended for viewer windows, use 'open tab for' for document windows.
 
         Args:
@@ -1185,9 +1313,238 @@ class DEVONthink3(Application):
             force (bool, optional): Force DEVONthink to always open a new window, even if the record is already opened in one. Off by default.
 
         Returns:
-            ThinkWindow: The newly opened think window.
+            ThinkWindow: The opened window.
         """
-        return self._call_method('openWindowFor', kwargs={'record': record, 'force': force})
+        kwargs = {
+            'record': record,
+            'force': force
+        }
+        return self._call_method('openWindowFor', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def optimize(self, database: Database) -> bool:
+        """Backup & optimize a database.
+
+        Args:
+            database (Database): The database to optimize.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'database': database
+        }
+        return self._call_method('optimize', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def paste_clipboard(self, to: Record = None) -> Record:
+        """Create a new record with the contents of the clipboard.
+
+        Args:
+            to (Record, optional): The destination group for the new record. Uses incoming group or group selector if not specified.
+
+        Returns:
+            Record: The new record.
+        """
+        kwargs = {
+            'to': to
+        }
+        return self._call_method('pasteClipboard', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def perform_smart_rule(self, name: str = None, record: Record = None, trigger: str = None) -> bool:
+        """Perform one or all smart rules.
+
+        Args:
+            name (str, optional): The name of the smart rule. All smart rules are used if not specified.
+            record (Record, optional): The record. All records matching the smart rule(s) conditions are used if no record is specified.
+            trigger (str, optional): The optional event to trigger smart rules. Can be one of "classify event", "clipping event", "consolidation event", "convert event", "creation event", "deconsolidation event", "download event", "duplicate event", "flagging event", "import event", "imprint event", "labelling event", "launch event", "move event", "no event", "OCR event", "open event", "open externally event", "rename event", "replicate event", "tagging event".
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'name': name,
+            'record': record,
+            'trigger': trigger
+        }
+        return self._call_method('performSmartRule', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def refresh(self, record: Record) -> bool:
+        """Refresh a record. Currently only supported by feeds.
+
+        Args:
+            record (Record): The record to refresh.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('refresh', args=None, kwargs={'record': record})
+
+    def replicate(self, record: Record, to: Record) -> Record:
+        """Replicate a record.
+
+        Args:
+            record (Record): The record or a list of records to replicate.
+            to (Record): The destination group which must be in the same database.
+
+        Returns:
+            Record: The replicated record.
+        """
+        return self._call_method('replicate', args=None, kwargs={'record': record, 'to': to})
+
+    def save_workspace(self, name: str) -> bool:
+        """Save a workspace.
+
+        Args:
+            name (str): The name of the workspace.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('saveWorkspace', args=[name])
+
+    def search(self, text: str = None, comparison: str = "no case", exclude_subgroups: bool = False, in_group: Record = None) -> List[Record]:
+        """Search for records in specified group or all databases.
+
+        Args:
+            text (str, optional): The search string. Supports keys, operators, and wildcards.
+            comparison (str, optional): The comparison to use. Defaults to "no case". Valid values are "fuzzy", "no case", and "no umlauts".
+            exclude_subgroups (bool, optional): Don't search in subgroups of the specified group. Off by default.
+            in_group (Record, optional): The group to search in. Searches in all databases if not specified.
+
+        Returns:
+            list: The search results.
+        """
+        kwargs = {
+            'comparison': comparison,
+            'excludeSubgroups': exclude_subgroups,
+            'in': in_group
+        }
+        return self._call_method('search', args=[text], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def set_cell_at(self, specifier: OSAObjProxy, column: int, row: int, to: str) -> bool:
+        """Set cell at specified position of current sheet.
+
+        Args:
+            specifier: The object for the command.
+            column (int): Either the index (1...n) or the name of the column of the cell.
+            row (int): The row (1...n) of the cell.
+            to (str): The content of the cell.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'column': column,
+            'row': row,
+            'to': to
+        }
+        
+        return self._call_method('setCellAt', args=[specifier], kwargs={k: v for k, v in kwargs.items() if v is not None})
+    
+    def show_progress_indicator(self, title: str, cancel_button: bool = False, steps: int = None) -> bool:
+        """Show a progress indicator or update an already visible indicator. You have to ensure that the indicator is hidden again via 'hide progress indicator' when the script ends or if an error occurs.
+
+        Args:
+            title (str): The title of the progress.
+            cancel_button (bool, optional): Display a button to cancel the process. Defaults to False.
+            steps (int, optional): The number of steps of the progress or a negative value for an indeterminate number.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'cancelButton': cancel_button,
+            'steps': steps
+        }
+        return self._call_method('showProgressIndicator', args=[title], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def start_downloads(self) -> bool:
+        """Start queue of download manager.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('startDownloads')
+
+    def step_progress_indicator(self, text: str = None) -> bool:
+        """Go to next step of a progress.
+
+        Args:
+            text (str, optional): The info for the current step.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'Text': text
+        }
+        return self._call_method('stepProgressIndicator', kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def stop_downloads(self) -> bool:
+        """Stop queue of download manager.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        return self._call_method('stopDownloads')
+
+    def summarize_highlights_of(self, records: list, to: str, destination_group: Record = None) -> Record:
+        """Summarize highlights & annotations of records. PDF, RTF(D), Markdown and web documents are currently supported.
+
+        Args:
+            records (list): The records to summarize.
+            to (str): The desired format. Accepts "markdown", "rich", or "sheet".
+            destination_group (Record, optional): The destination group for the summary. The current group of the database is used if not specified.
+
+        Returns:
+            Record: The summary record.
+        """
+        kwargs = {
+            'records': records,
+            'to': to,
+            'in': destination_group
+        }
+        return self._call_method('summarizeHighlightsOf', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def synchronize(self, database: Database = None, record: Record = None) -> bool:
+        """Synchronizes records with the filesystem or databases with their sync locations. Only one of both operations is supported.
+
+        Args:
+            database (Database, optional): The database to synchronize via its sync locations.
+            record (Record, optional): The (external) record to update. New items are added, updated ones indexed and obsolete ones removed. NOTE: This is rarely necessary as databases are usually automatically updated by filesystem events.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'database': database,
+            'record': record
+        }
+        return self._call_method('synchronize', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def update_thumbnail(self, record: Record) -> bool:
+        """Update existing thumbnail of a record. Thumbnailing is performed asynchronously in the background.
+        
+        Args:
+            record (Record): The record.
+        
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        kwargs = {
+            'of': record
+        }
+        return self._call_method('updateThumbnail', args=None, kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+    def verify(self, database: Database) -> int:
+        """Verify a database. Returns total number of errors, invalid filenames, and missing files.
+
+        Args:
+            database (Database): The database to verify.
+
+        Returns:
+            int: The total number of errors, invalid filenames, and missing files.
+        """
+        return self._call_method('verify', args=[database])
 
     def __repr__(self):
         return f'<DEVONthink3 {self.id}>'
