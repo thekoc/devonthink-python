@@ -4,6 +4,7 @@ from ...helper_bridging import OSAObjProxy, OSAObjArray
 from typing import List
 from .record import Record
 from .smartgroup import SmartGroup
+from. taggroup import TagGroup
 
 class Database(OSAObjProxy):
     # elements
@@ -27,11 +28,10 @@ class Database(OSAObjProxy):
         """The smart groups contained in the database."""
         return self._get_property('smartGroups')
 
-    # TODO: tag_groups
-    # @property
-    # def tag_groups(self) -> List[TagGroup]:
-    #     """The tag groups contained in the database."""
-    #     return self.get_property_native('tagGroups')
+    @property
+    def tag_groups(self) -> List[TagGroup]:
+        """The tag groups contained in the database."""
+        return self.get_property_native('tagGroups')
 
     # properties
     @property

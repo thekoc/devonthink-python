@@ -6,11 +6,27 @@ To convert the JXA (JavaScript for Automation) file to Python code, you should f
 
 2. **Elements**: Elements are read-only properties in Python. Use `@property` decorator to define getters.
 
-3. **Properties**: Convert JXA properties to Python properties. Use `@property` for getters. For read-write properties, add a `@property.setter` decorator.
+3. **Properties**: Convert JXA properties to Python properties. Use `@property` for getters. For read-write properties, add a `@property.setter` decorator. Note that if the return type is primitive (like `text`, `integer`, `real`, etc.), you should use `_call_method` not `_get_property` in getter.
 
-4. **Methods**: Methods should be converted into Python class methods. Positional arguments in JXA are positional in Python, while bracketed arguments are keyword arguments in Python.
+4. **Methods**: Methods should be converted into Python class methods. Arguments with square brackets are optional.
 
-5. **Naming Conventions**: Convert camelCase names from JXA to snake_case in Python.
+5. **Positional versus Keyword Arguments**: When translating JXA methods to Python, it’s essential to accurately determine whether arguments are positional or keyword arguments. In JXA definition, if the argument has both name and type (eg. (newline) record: Record : <description>) then it is a keyword argument in Python. If the argument is listed on the same line as the method name, without an explicit name, (`<method_name>` Record: <description>) it is a positional argument in Python.
+
+    Example:
+    1. consolidate method : Move an external/indexed record (and its children) into the database.
+    consolidate
+    record: Record : The record to consolidate.
+    → boolean
+
+    In this case, `record` is a keyword argument in Python.
+
+    2. consolidate method : Move an external/indexed record (and its children) into the database.
+    consolidate Record: The record to consolidate.
+    → boolean
+
+    In this case, `Record` is a positional argument in Python.
+
+6. **Naming Conventions**: Convert camelCase names from JXA to snake_case in Python.
 
 ### Example Conversion
 
@@ -44,7 +60,7 @@ class Mailbox(OSAObjProxy):
     @property
     def name(self) -> str:
         """The name of a mailbox."""
-        return self._get_property('name')
+        return self._call_method('name')
     
     @name.setter
     def name(self, value: str):
@@ -53,7 +69,7 @@ class Mailbox(OSAObjProxy):
     @property
     def unread_count(self) -> int:
         """The number of unread messages in the mailbox."""
-        return self._get_property('unreadCount')
+        return self._call_method('unreadCount')
     
     @property
     def account(self) -> Account:
@@ -64,46 +80,80 @@ class Mailbox(OSAObjProxy):
 #### JXA Methods Definition
 
 ```txt
-checkForNewMail method : Triggers a check for email.
-[for: Account] : Specify the account that you wish to check for mail
-extractNameFrom method : Command to get the full name out of a fully specified email address.
-extractNameFrom text : fully formatted email address
-→ text : the full name
+createLocation method : Create a hierarchy of groups if necessary.
+createLocation Text : The hierarchy as a POSIX path (/ in names has to be replaced with \/, see location property).
+[in: Database] : The database. Uses current database if not specified.
+→ Record
+addReadingList method : Add record or URL to reading list.
+addReadingList
+[record: Record] : The record. Only documents are supported.
+[title: Text] : The title of the webpage.
+[url: Text] : The URL of the webpage.
+→ boolean
+addRow method : Add new row to current sheet.
+addRow specifier : the object for the command
+[cells: list] : Cells of new row.
+→ boolean
 ```
 
 #### Python Methods
 
 ```python
-class Example(OSAObjProxy):
-    # ========== Methods ==========
-    def check_for_new_mail(self, account: Account = None) -> None:
-        """Triggers a check for email.
-        
-        Args:
-            account (Account, optional): Specify the account that you wish to check for mail.
-        
-        Returns:
-            None
-        """
-        if account is None:
-            return self._call_method('checkForNewMail')
-        else:
-            return self._call_method('checkForNewMail', args=None, kwargs={'for': account})
+def create_location(self, path: str, database: Database = None) -> Record:
+    """Create a hierarchy of groups if necessary.
+
+    Args:
+        path (str): The hierarchy as a POSIX path (/ in names has to be replaced with \/, see location property).
+        database (Database, optional): The database. Uses current database if not specified.
+
+    Returns:
+        Record: The created record.
+    """
+    kwargs = {
+        'in': database
+    }
+    return self._call_method('createLocation', args=[path], kwargs={k: v for k, v in kwargs.items() if v is not None}
+
+def add_reading_list(self, record: Record = None, title: str = None, url: str = None) -> bool:
+    """Add record or URL to reading list.
     
-    def extract_name_from(self, text: str) -> str:
-        """Command to get the full name out of a fully specified email address.
-        
-        Args:
-            text (str): fully formatted email address.
-        
-        Returns:
-            str: the full name
-        """
-        return self._call_method('extractNameFrom', args=[text], kwargs=None)
+    Args:
+        record (Record, optional): The record. Only documents are supported.
+        title (str, optional): The title of the webpage.
+        url (str, optional): The URL of the webpage.
+    
+    Returns:
+        bool: True if successful, False otherwise.
+    """
+    kwargs = {
+        'record': record,
+        'title': title,
+        'url': url
+    }
+    return self._call_method('addReadingList', args=[], kwargs={k: v for k, v in kwargs.items() if v is not None})
+
+def add_row(self, specifier, cells: list = None) -> bool:
+    """Add new row to current sheet.
+    
+    Args:
+        specifier: The object for the command.
+        cells (list, optional): Cells of new row.
+    
+    Returns:
+        bool: True if successful, False otherwise.
+    """
+    kwargs = {
+        'cells': cells
+    }
+    return self._call_method('addRow', args=[specifier], kwargs={k: v for k, v in kwargs.items() if v is not None})
 ```
+**Important: When converting method, please ensure the rule 5 (Positional versus Keyword Arguments) is followed.**
+
 
 This approach should be applied to all objects, properties, and methods in the JXA file to create their corresponding Python counterparts.
 
 When converting, just output the methods and properties of the class. Do not include the class definition or any imports.
+
+Before you output, think carefully and double check whether each argument should be positional or keyword.
 
 If you understood, reply "Ready" and I'll send you a sdef file. Respond with python code and nothing else.

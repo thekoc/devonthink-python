@@ -194,7 +194,6 @@ class JsonTranslator {
 
 
         if (typeof obj === 'object') {
-            // TODO: Handle Date
             if (obj instanceof Date) {
                 return {
                     type: 'date',

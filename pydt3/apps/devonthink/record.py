@@ -414,7 +414,6 @@ class Record(OSAObjProxy):
 
     @modification_date.setter
     def modification_date(self, value: datetime.datetime):
-        # TODO: Implement change of modification date
         return self._set_property('modificationDate', value)
 
     @property
